@@ -44,6 +44,8 @@ interface ActionButtonsProps {
   onTogglePreview?: () => void
   /** Whether preview mode is currently active */
   isPreviewActive?: boolean
+  /** Show the keyboard shortcuts help modal */
+  onShowHelp?: () => void
 }
 
 // ---------------------------------------------------------------------------
@@ -126,6 +128,7 @@ const ActionButtons = ({
   focusModeActive = false,
   onTogglePreview,
   isPreviewActive = false,
+  onShowHelp,
 }: ActionButtonsProps) => {
   const { theme } = useTheme()
   const { content, setContent } = useWriter()
@@ -200,7 +203,7 @@ const ActionButtons = ({
     cursor: 'pointer',
     color: theme.text,
     opacity: 0.4,
-    padding: '4px 8px',
+    padding: '10px 12px',
     fontSize: '12px',
     fontFamily: '"Space Mono", monospace',
     fontWeight: 'bold',
@@ -226,18 +229,17 @@ const ActionButtons = ({
           Clear
         </button>
 
-        {/* Strikethrough button -- only shown when focus mode is active */}
-        {focusModeActive && onStrikethrough && (
+        {/* Strikethrough button -- always visible */}
+        {onStrikethrough && (
           <button
             onClick={handleStrikethrough}
             style={{
               ...buttonStyle,
-              color: theme.strikethrough,
-              opacity: 0.6,
+              opacity: focusModeActive ? 0.6 : 0.3,
             }}
             title="Strikethrough focused text (Cmd+Shift+X)"
           >
-            ~~Strike~~
+            ~~S~~
           </button>
         )}
 
@@ -303,6 +305,30 @@ const ActionButtons = ({
         >
           Sample
         </button>
+
+        {/* Help / keyboard shortcuts button */}
+        {onShowHelp && (
+          <button
+            onClick={onShowHelp}
+            style={buttonStyle}
+            title="Keyboard shortcuts (Tab)"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ verticalAlign: 'middle' }}
+            >
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <ConfirmDialog

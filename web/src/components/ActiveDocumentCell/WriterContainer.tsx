@@ -469,6 +469,7 @@ const WriterContainer = () => {
         focusModeActive={focusModeActive}
         onTogglePreview={togglePreview}
         isPreviewActive={viewMode === 'preview'}
+        onShowHelp={() => setHelpVisible(true)}
       />
     </div>
   )
