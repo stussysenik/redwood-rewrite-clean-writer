@@ -65,7 +65,7 @@ interface SyntaxBackdropProps {
   /** The text to render with syntax highlighting */
   text: string
   /** Syntax classification sets (null = plain text, no highlighting) */
-  syntaxSets: SyntaxSets | null
+  syntaxSets: SyntaxSets
   /** Per-category toggle (which categories should be highlighted) */
   highlightConfig: HighlightConfig
   /** Active RISO theme */

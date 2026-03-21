@@ -77,7 +77,7 @@ export function useSyntaxWorker(text: string) {
   const latestPhonemeIdRef = useRef(0)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [syntaxSets, setSyntaxSets] = useState<SyntaxSets | null>(null)
+  const [syntaxSets, setSyntaxSets] = useState<SyntaxSets>(() => toSyntaxSets(EMPTY_ANALYSIS))
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [songData, setSongData] = useState<SongAnalysis | null>(null)
   const [phonemeData, setPhonemeData] = useState<PhonemeAnalysis | null>(null)

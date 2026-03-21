@@ -114,7 +114,7 @@ interface TypewriterProps {
   /** Paragraph spacing in em (applied as margin-bottom on newline blocks) */
   paragraphSpacing?: number
   /** Syntax classification sets from useSyntaxWorker (null = no highlighting) */
-  syntaxSets?: SyntaxSets | null
+  syntaxSets?: SyntaxSets
   /** Per-category toggle for which syntax types are highlighted */
   highlightConfig?: HighlightConfig
   /** Focus navigation state for focus mode dimming */
@@ -337,7 +337,7 @@ const Typewriter = ({
           letterSpacingProp !== 0 ? `${letterSpacingProp}px` : undefined,
         minHeight: '100%',
         cursor: 'text',
-        padding: '2rem 1rem',
+        padding: '1rem 1rem 2rem',
       }}
     >
       {/* Max-width centered container with relative positioning for overlay */}

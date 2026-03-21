@@ -21,6 +21,7 @@ import { useQuery, useMutation } from '@redwoodjs/web'
 
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useAutoSave } from 'src/hooks/useAutoSave'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
 import { countWords } from 'src/lib/wordCount'
 import type { HighlightConfig, RisoTheme, SyntaxSets } from 'src/types/editor'
@@ -79,7 +80,7 @@ interface JournalEditorProps {
   /** Active theme for the editor */
   theme: RisoTheme
   /** Pre-computed syntax sets from the parent (or null) */
-  syntaxSets: SyntaxSets | null
+  syntaxSets: SyntaxSets
   /** Syntax highlight toggles */
   highlightConfig: HighlightConfig
   /** CSS font-family string */
@@ -140,7 +141,8 @@ const JournalEditor = ({
   const [mood, setMoodRaw] = useState<string | null>(null)
   const [tags, setTagsRaw] = useState<string[]>([])
   const [entryId, setEntryId] = useState<string | null>(null)
-  const [calendarOpen, setCalendarOpen] = useState(true)
+  const { isMobile } = useResponsiveBreakpoint()
+  const [calendarOpen, setCalendarOpen] = useState(() => !isMobile)
 
   // Refs for the auto-save closure to always see current values
   const contentRef = useRef(content)
