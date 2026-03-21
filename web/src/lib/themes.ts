@@ -21,11 +21,11 @@ import type { RisoTheme } from "src/types/editor";
 export const THEME_STORAGE_KEY = "clean_writer_theme";
 export const FONT_STORAGE_KEY = "clean_writer_font";
 
-// --- Build metadata (placeholders until Vite globals are wired) ---
-export const BUILD_NUMBER = "v0.1.0";
-export const BUILD_TRACK = "dev";
+// --- Build metadata ---
+export const BUILD_NUMBER = "v1.0.0";
+export const BUILD_TRACK = "redwood";
 export const BUILD_HASH = "000000";
-export const BUILD_IDENTITY = `${BUILD_NUMBER} · ${BUILD_TRACK} · ${BUILD_HASH}`;
+export const BUILD_IDENTITY = `${BUILD_NUMBER} · ${BUILD_TRACK}`;
 
 /**
  * Build a complete theme with OKLCH-computed highlight + rhyme color palettes.

@@ -7,6 +7,7 @@
  *   2. Syncs CSS custom properties on <html> for global styling
  *   3. Updates <meta name="theme-color"> for PWA status bar coloring
  *   4. Exposes `isDark` so components can adapt to dark/light schemes
+ *   5. Merges user-created custom themes with the 15 built-in themes
  *
  * The CSS custom properties set on :root are:
  *   --bg-color, --text-color, --accent-color,
@@ -18,6 +19,7 @@ import {
   useState,
   useEffect,
   useMemo,
+  useCallback,
   type ReactNode,
 } from 'react'
 
@@ -38,17 +40,17 @@ interface ThemeContextValue {
   setThemeId: (id: string) => void
   /** Whether the current theme has a dark background */
   isDark: boolean
+  /** All available themes (built-in + custom) */
+  allThemes: RisoTheme[]
+  /** Add a custom theme to the list at runtime */
+  addCustomTheme: (theme: RisoTheme) => void
+  /** Remove a custom theme by id */
+  removeCustomTheme: (id: string) => void
+  /** Replace the full custom themes list (e.g. after reorder) */
+  setCustomThemes: (themes: RisoTheme[]) => void
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
-
-// ---------------------------------------------------------------------------
-// Helper: resolve a themeId to its RisoTheme object
-// ---------------------------------------------------------------------------
-
-function resolveTheme(id: string): RisoTheme {
-  return THEMES.find((t) => t.id === id) ?? THEMES[0]
-}
 
 // ---------------------------------------------------------------------------
 // CSS custom property sync
@@ -98,33 +100,66 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, defaultThemeId }: ThemeProviderProps) {
+  // Custom themes loaded from DB or created during session
+  const [customThemes, setCustomThemesRaw] = useState<RisoTheme[]>([])
+
+  // Merged list: built-in + custom
+  const allThemes = useMemo(
+    () => [...THEMES, ...customThemes],
+    [customThemes]
+  )
+
   const [themeId, setThemeIdRaw] = useState<string>(() => {
     if (defaultThemeId) return defaultThemeId
 
     // Try to restore the user's last choice from localStorage
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(THEME_STORAGE_KEY)
-      if (stored && THEMES.some((t) => t.id === stored)) {
-        return stored
-      }
+      if (stored) return stored
     }
 
     // Fall back to the first theme ("classic")
     return THEMES[0].id
   })
 
-  const theme = useMemo(() => resolveTheme(themeId), [themeId])
+  // Resolve theme from the merged list
+  const theme = useMemo(
+    () => allThemes.find((t) => t.id === themeId) ?? THEMES[0],
+    [themeId, allThemes]
+  )
   const isDark = useMemo(() => isDarkBackground(theme.background), [theme])
 
   /** Persist + update when user selects a new theme */
-  const setThemeId = (id: string) => {
+  const setThemeId = useCallback((id: string) => {
     setThemeIdRaw(id)
     try {
       localStorage.setItem(THEME_STORAGE_KEY, id)
     } catch {
       // localStorage may be full or blocked -- silently ignore
     }
-  }
+  }, [])
+
+  /** Add a single custom theme at runtime (after save) */
+  const addCustomTheme = useCallback((newTheme: RisoTheme) => {
+    setCustomThemesRaw((prev) => [...prev, newTheme])
+  }, [])
+
+  /** Remove a custom theme by id */
+  const removeCustomTheme = useCallback(
+    (id: string) => {
+      setCustomThemesRaw((prev) => prev.filter((t) => t.id !== id))
+      // If the deleted theme was active, fall back to first built-in
+      if (themeId === id) {
+        setThemeId(THEMES[0].id)
+      }
+    },
+    [themeId, setThemeId]
+  )
+
+  /** Replace all custom themes (e.g. after reorder or DB load) */
+  const setCustomThemes = useCallback((themes: RisoTheme[]) => {
+    setCustomThemesRaw(themes)
+  }, [])
 
   // Sync CSS vars and meta tag whenever the theme changes
   useEffect(() => {
@@ -133,9 +168,18 @@ export function ThemeProvider({ children, defaultThemeId }: ThemeProviderProps) 
   }, [theme])
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme, themeId, setThemeId, isDark }),
+    () => ({
+      theme,
+      themeId,
+      setThemeId,
+      isDark,
+      allThemes,
+      addCustomTheme,
+      removeCustomTheme,
+      setCustomThemes,
+    }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [theme, themeId, isDark]
+    [theme, themeId, isDark, allThemes]
   )
 
   return (
@@ -152,7 +196,7 @@ export function ThemeProvider({ children, defaultThemeId }: ThemeProviderProps) 
  *
  * @example
  * ```tsx
- * const { theme, setThemeId, isDark } = useTheme()
+ * const { theme, setThemeId, isDark, allThemes, addCustomTheme } = useTheme()
  * ```
  */
 export function useTheme(): ThemeContextValue {

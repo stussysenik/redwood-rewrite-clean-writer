@@ -19,6 +19,7 @@ import ThemeSelector from 'src/components/ThemeSelector/ThemeSelector'
 import ActionButtons from 'src/components/Toolbar/ActionButtons'
 import WordCount from 'src/components/Toolbar/WordCount'
 import { useTheme } from 'src/context/ThemeContext'
+import { BUILD_IDENTITY } from 'src/lib/themes'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -102,8 +103,23 @@ const Toolbar = ({
           />
         </div>
 
-        {/* Right section: settings button + font selector */}
+        {/* Right section: version badge + settings button + font selector */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Version badge */}
+          <span
+            style={{
+              fontSize: '9px',
+              fontFamily: '"Space Mono", monospace',
+              color: theme.text,
+              opacity: 0.2,
+              letterSpacing: '0.05em',
+              whiteSpace: 'nowrap',
+              userSelect: 'none',
+            }}
+          >
+            {BUILD_IDENTITY}
+          </span>
+
           <button
             onClick={onToggleSettings}
             title="Typography settings"
