@@ -5,16 +5,22 @@
  * categories (noun, verb, adjective, etc.) and deterministic regex patterns
  * for URLs, numbers, and hashtags.
  *
+ * Also handles song mode (rhyme/syllable analysis) and phoneme mode
+ * (character-level phonemic classification) via the CMU dictionary.
+ *
  * Protocol (message-based, correlation-ID matched):
- *   Request:  { id: number, type: "syntax", text: string }
- *   Response: { id: number, type: "syntax", result: SyntaxAnalysis }
+ *   Request:  { id: number, type: "syntax"|"song"|"phoneme", text: string }
+ *   Response: { id: number, type: "syntax"|"song"|"phoneme", result: ... }
  *
  * Running in a dedicated Worker thread keeps the ~10-50ms NLP pass from
  * blocking the editor's keystroke-to-pixel pipeline.
  */
 import nlp from 'compromise'
+import { dictionary as cmuDict } from 'cmu-pronouncing-dictionary'
 
-import type { SyntaxAnalysis } from '../types/editor'
+import type { SyntaxAnalysis, SongAnalysis, PhonemeAnalysis } from '../types/editor'
+import { analyzeSong } from '../lib/songAnalysisService'
+import { analyzePhonemes } from '../lib/phonemeService'
 
 import {
   extractHashtags,
@@ -25,20 +31,18 @@ import {
 } from '../lib/syntaxPatterns'
 
 // ---------------------------------------------------------------------------
-// Worker message types
+// Worker message types (discriminated union)
 // ---------------------------------------------------------------------------
 
-interface WorkerRequest {
-  type: 'syntax'
-  text: string
-  id: number
-}
+type WorkerRequest =
+  | { type: 'syntax'; text: string; id: number }
+  | { type: 'song'; text: string; id: number }
+  | { type: 'phoneme'; text: string; id: number }
 
-interface WorkerResponse {
-  type: 'syntax'
-  result: SyntaxAnalysis
-  id: number
-}
+type WorkerResponse =
+  | { type: 'syntax'; result: SyntaxAnalysis; id: number }
+  | { type: 'song'; result: SongAnalysis; id: number }
+  | { type: 'phoneme'; result: PhonemeAnalysis; id: number }
 
 // ---------------------------------------------------------------------------
 // Static word lists -- higher accuracy than NLP for closed-class words
@@ -249,6 +253,22 @@ self.onmessage = (
       type: 'syntax',
       result,
       id,
-    } satisfies WorkerResponse)
+    } as WorkerResponse)
+  } else if (data.type === 'song') {
+    const { text, id } = data
+    const result = analyzeSong(text, cmuDict)
+    ;(self as unknown as Worker).postMessage({
+      type: 'song',
+      result,
+      id,
+    } as WorkerResponse)
+  } else if (data.type === 'phoneme') {
+    const { text, id } = data
+    const result = analyzePhonemes(text, cmuDict)
+    ;(self as unknown as Worker).postMessage({
+      type: 'phoneme',
+      result,
+      id,
+    } as WorkerResponse)
   }
 }

@@ -8281,6 +8281,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cmu-pronouncing-dictionary@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "cmu-pronouncing-dictionary@npm:3.0.0"
+  checksum: 10c0/a595da61e30295ad82199e87686136006d463bf7ef115e3f4c781d95ba00d0dfa3c502644efbc7827c153d8c7d3c9ba73b2dc01a7006918c90f4e8d885ab277d
+  languageName: node
+  linkType: hard
+
 "co@npm:^4.6.0":
   version: 4.6.0
   resolution: "co@npm:4.6.0"
@@ -19248,6 +19255,7 @@ __metadata:
     "@types/react": "npm:^18.2.55"
     "@types/react-dom": "npm:^18.2.19"
     autoprefixer: "npm:^10.4.27"
+    cmu-pronouncing-dictionary: "npm:^3.0.0"
     compromise: "npm:^14.15.0"
     postcss: "npm:^8.5.8"
     postcss-loader: "npm:^8.2.1"

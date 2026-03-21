@@ -34,6 +34,9 @@ import type {
   HighlightConfig,
   RisoTheme,
   SyntaxSets,
+  SongAnalysis,
+  PhonemeAnalysis,
+  PhonemeHighlightConfig,
 } from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
@@ -116,6 +119,18 @@ interface TypewriterProps {
   highlightConfig?: HighlightConfig
   /** Focus navigation state for focus mode dimming */
   focusNavState?: FocusNavState | null
+  /** Song mode: analysis data for rhyme overlay rendering */
+  songData?: SongAnalysis | null
+  /** Song mode: which rhyme groups are visible */
+  visibleRhymeGroups?: Set<number>
+  /** Song mode: whether song mode is active */
+  songMode?: boolean
+  /** Phoneme mode: analysis data for character-level rendering */
+  phonemeData?: PhonemeAnalysis | null
+  /** Phoneme mode: which categories are toggled on */
+  phonemeConfig?: PhonemeHighlightConfig | null
+  /** Phoneme mode: whether phoneme mode is active */
+  phonemeMode?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -154,6 +169,12 @@ const Typewriter = ({
   syntaxSets = null,
   highlightConfig = DEFAULT_HIGHLIGHT_CONFIG,
   focusNavState = null,
+  songData = null,
+  visibleRhymeGroups,
+  songMode = false,
+  phonemeData = null,
+  phonemeConfig = null,
+  phonemeMode = false,
 }: TypewriterProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
@@ -341,6 +362,12 @@ const Typewriter = ({
           cursorColor={lastWordSyntaxColor}
           showCursor={isFocused}
           focusNavState={focusNavState}
+          songData={songData}
+          visibleRhymeGroups={visibleRhymeGroups}
+          songMode={songMode}
+          phonemeData={phonemeData}
+          phonemeConfig={phonemeConfig}
+          phonemeMode={phonemeMode}
         />
 
         {/* Layer 2: Hidden input capture (must match SyntaxBackdrop font metrics) */}

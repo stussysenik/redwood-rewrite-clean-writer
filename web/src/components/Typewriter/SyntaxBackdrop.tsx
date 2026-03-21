@@ -9,15 +9,12 @@
  * wordBreak) MUST match the hidden textarea exactly so that the two layers
  * align pixel-for-pixel.
  *
- * Rendering algorithm:
- *   1. Split text into segments: strikethrough blocks (~~...~~) and normal text
- *   2. For normal text, split on whitespace boundaries preserving tokens
- *   3. For each non-whitespace token, normalize via normalizeTokenForSyntaxLookup
- *   4. Check Set membership in priority order (URLs > hashtags > numbers > NLP)
- *   5. If matched AND the category is enabled in highlightConfig, render bold + colored
- *   6. Otherwise render in the default theme.text color
- *   7. Strikethrough text renders with line-through decoration + strikethrough color
- *   8. Focus mode dims non-focused text to 0.3 opacity
+ * Rendering modes:
+ *   A. Syntax highlighting: word-level NLP coloring (default)
+ *   B. Song mode: overlays rhyme group colors on matching words (rounded pill)
+ *   C. Phoneme mode: colors each character by phoneme category (bitmask-driven)
+ *
+ * Song and phoneme modes are mutually exclusive but can coexist with syntax highlighting.
  */
 import React, { useMemo } from 'react'
 
@@ -28,13 +25,37 @@ import {
   isUrlToken,
   normalizeTokenForSyntaxLookup,
 } from 'src/lib/syntaxPatterns'
+import {
+  groupIntoSpans,
+  configToMask,
+  PHONEME_CSS_CLASS_MAP,
+} from 'src/lib/phonemeService'
+import { RHYME_COLORS } from 'src/lib/themes'
 import type {
   FocusNavState,
   HighlightConfig,
   RisoTheme,
   SyntaxSets,
   TextRange,
+  SongAnalysis,
+  PhonemeAnalysis,
+  PhonemeHighlightConfig,
 } from 'src/types/editor'
+
+// ---------------------------------------------------------------------------
+// Phoneme category color palette (matches PhonemePanel)
+// ---------------------------------------------------------------------------
+
+const PHONEME_CATEGORY_COLORS: Record<string, string> = {
+  'ph-vowel': '#E85D75',
+  'ph-plosive': '#4A9EE0',
+  'ph-fricative': '#8BC34A',
+  'ph-nasal': '#FF9800',
+  'ph-liquid': '#9C27B0',
+  'ph-glide': '#00BCD4',
+  'ph-stressed': '#FF5722',
+  'ph-unstressed': '#607D8B',
+}
 
 // ---------------------------------------------------------------------------
 // Props
@@ -65,6 +86,18 @@ interface SyntaxBackdropProps {
   showCursor: boolean
   /** Focus navigation state (optional -- null/undefined means no focus mode) */
   focusNavState?: FocusNavState | null
+  /** Song mode: analysis data for rhyme overlay rendering */
+  songData?: SongAnalysis | null
+  /** Song mode: which rhyme groups are visible */
+  visibleRhymeGroups?: Set<number>
+  /** Song mode: whether song mode is active */
+  songMode?: boolean
+  /** Phoneme mode: analysis data for character-level rendering */
+  phonemeData?: PhonemeAnalysis | null
+  /** Phoneme mode: which categories are toggled on */
+  phonemeConfig?: PhonemeHighlightConfig | null
+  /** Phoneme mode: whether phoneme mode is active */
+  phonemeMode?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +179,26 @@ function isInFocusRange(
   return charOffset < focusedRange.end && segEnd > focusedRange.start
 }
 
+/**
+ * Build a lookup map from word (lowercase) -> rhyme color for song mode.
+ * Only includes words from visible rhyme groups.
+ */
+function buildRhymeWordColorMap(
+  songData: SongAnalysis,
+  visibleGroups: Set<number>,
+  rhymeColors: readonly string[] | string[]
+): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const group of songData.rhymeGroups) {
+    if (!visibleGroups.has(group.colorIndex)) continue
+    const color = rhymeColors[group.colorIndex] ?? rhymeColors[0]
+    for (const word of group.words) {
+      map.set(word.toLowerCase(), color)
+    }
+  }
+  return map
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -163,12 +216,32 @@ const SyntaxBackdrop = ({
   cursorColor,
   showCursor,
   focusNavState,
+  songData,
+  visibleRhymeGroups,
+  songMode = false,
+  phonemeData,
+  phonemeConfig,
+  phonemeMode = false,
 }: SyntaxBackdropProps) => {
   const focusActive = focusNavState && focusNavState.mode !== 'none'
   const focusedRange = focusNavState?.focusedRange ?? null
 
+  // Precompute song mode rhyme word -> color map
+  const rhymeWordColorMap = useMemo(() => {
+    if (!songMode || !songData || !visibleRhymeGroups) return null
+    const colors = theme.rhymeColors ?? [...RHYME_COLORS]
+    return buildRhymeWordColorMap(songData, visibleRhymeGroups, colors)
+  }, [songMode, songData, visibleRhymeGroups, theme.rhymeColors])
+
+  // Precompute phoneme active mask
+  const phonemeActiveMask = useMemo(() => {
+    if (!phonemeMode || !phonemeConfig) return 0
+    return configToMask(phonemeConfig)
+  }, [phonemeMode, phonemeConfig])
+
   /**
    * Render a single normal (non-strikethrough) token with syntax highlighting.
+   * Optionally adds song mode rhyme overlay.
    */
   const renderSyntaxToken = (
     token: string,
@@ -186,7 +259,18 @@ const SyntaxBackdrop = ({
 
     const baseOpacity = dimmed ? 0.3 : 1
 
-    // No syntax data -- render plain
+    // Song mode: check for rhyme group membership
+    let rhymeColor: string | null = null
+    if (rhymeWordColorMap) {
+      const cleaned = token
+        .toLowerCase()
+        .replace(/[^a-z'-]/g, '')
+      if (cleaned && rhymeWordColorMap.has(cleaned)) {
+        rhymeColor = rhymeWordColorMap.get(cleaned)!
+      }
+    }
+
+    // No syntax data -- render plain (but still apply song overlay)
     if (!syntaxSets) {
       return (
         <span
@@ -195,6 +279,14 @@ const SyntaxBackdrop = ({
             color: theme.text,
             opacity: baseOpacity,
             transition: 'color 0.3s ease, opacity 0.2s ease',
+            ...(rhymeColor
+              ? {
+                  backgroundColor: `${rhymeColor}25`,
+                  borderRadius: '3px',
+                  padding: '0 2px',
+                  margin: '0 -2px',
+                }
+              : {}),
           }}
         >
           {token}
@@ -305,6 +397,14 @@ const SyntaxBackdrop = ({
           fontWeight: isMatch ? 700 : 'inherit',
           opacity: baseOpacity,
           transition: 'color 0.3s ease, opacity 0.2s ease',
+          ...(rhymeColor
+            ? {
+                backgroundColor: `${rhymeColor}25`,
+                borderRadius: '3px',
+                padding: '0 2px',
+                margin: '0 -2px',
+              }
+            : {}),
         }}
       >
         {token}
@@ -313,10 +413,57 @@ const SyntaxBackdrop = ({
   }
 
   /**
+   * Render phoneme-highlighted content: each character colored by its
+   * phoneme category based on the active bitmask toggles.
+   */
+  const renderPhonemeContent = useMemo(() => {
+    if (!phonemeMode || !phonemeData || !phonemeConfig || phonemeActiveMask === 0) {
+      return null
+    }
+
+    const spans = groupIntoSpans(text, phonemeData.flags, phonemeActiveMask)
+
+    return spans.map((span, idx) => {
+      if (!span.className) {
+        // Neutral (whitespace or unclassified)
+        return (
+          <React.Fragment key={idx}>
+            {span.text}
+          </React.Fragment>
+        )
+      }
+
+      const category = PHONEME_CSS_CLASS_MAP[span.className]
+      const phColor = category
+        ? PHONEME_CATEGORY_COLORS[span.className] ?? theme.text
+        : theme.text
+
+      return (
+        <span
+          key={idx}
+          style={{
+            color: phColor,
+            fontWeight: 700,
+            transition: 'color 0.2s ease',
+          }}
+        >
+          {span.text}
+        </span>
+      )
+    })
+  }, [text, phonemeMode, phonemeData, phonemeConfig, phonemeActiveMask, theme.text])
+
+  /**
    * Render highlighted text spans with strikethrough + focus support.
+   * Used for syntax and song modes (word-level rendering).
    */
   const highlightedContent = useMemo(() => {
     if (!text) return null
+
+    // If phoneme mode is active and has valid data, use phoneme rendering instead
+    if (phonemeMode && renderPhonemeContent) {
+      return renderPhonemeContent
+    }
 
     // Split into strikethrough and normal segments
     const segments = splitStrikethroughSegments(text)
@@ -371,7 +518,7 @@ const SyntaxBackdrop = ({
       })
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, syntaxSets, highlightConfig, theme, focusActive, focusedRange])
+  }, [text, syntaxSets, highlightConfig, theme, focusActive, focusedRange, rhymeWordColorMap, phonemeMode, renderPhonemeContent])
 
   return (
     <div

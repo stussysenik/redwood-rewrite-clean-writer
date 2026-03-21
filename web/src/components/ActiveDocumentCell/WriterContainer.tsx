@@ -32,7 +32,14 @@ import { useFocusNavigation } from 'src/hooks/useFocusNavigation'
 import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
 import { FONT_OPTIONS, FONT_STORAGE_KEY } from 'src/lib/fonts'
-import type { FocusMode, HighlightConfig, ViewMode } from 'src/types/editor'
+import { getLevelPreset } from 'src/lib/phonemeService'
+import type {
+  FocusMode,
+  HighlightConfig,
+  PhonemeHighlightConfig,
+  PhonemeLevel,
+  ViewMode,
+} from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -103,7 +110,15 @@ const WriterContainer = () => {
   const { mode } = useWritingMode()
 
   // NLP syntax analysis via Web Worker (debounced 150ms)
-  const { syntaxSets } = useSyntaxWorker(content)
+  const {
+    syntaxSets,
+    songData,
+    phonemeData,
+    analyzeSong: analyzeSongText,
+    analyzePhonemes: analyzePhonemesText,
+    clearSongData,
+    clearPhonemeData,
+  } = useSyntaxWorker(content)
 
   // Highlight config -- all syntax categories enabled by default
   const [highlightConfig, setHighlightConfig] = useState<HighlightConfig>({
@@ -129,6 +144,19 @@ const WriterContainer = () => {
 
   // Syntax panel visibility (desktop only)
   const [syntaxPanelOpen, setSyntaxPanelOpen] = useState(true)
+
+  // Song mode state
+  const [songMode, setSongMode] = useState(false)
+  const [visibleRhymeGroups, setVisibleRhymeGroups] = useState<Set<number>>(
+    new Set([0, 1, 2, 3, 4, 5, 6, 7])
+  )
+
+  // Phoneme mode state
+  const [phonemeMode, setPhonemeMode] = useState(false)
+  const [phonemeConfig, setPhonemeConfig] = useState<PhonemeHighlightConfig>(
+    () => getLevelPreset('phoneme')
+  )
+  const [phonemeLevel, setPhonemeLevel] = useState<PhonemeLevel>('phoneme')
 
   // Responsive breakpoint for syntax panel
   const { isDesktop } = useResponsiveBreakpoint()
@@ -177,6 +205,49 @@ const WriterContainer = () => {
   const togglePreview = useCallback(() => {
     setViewMode((prev) => (prev === 'write' ? 'preview' : 'write'))
   }, [])
+
+  // Song mode toggle: mutually exclusive with phoneme mode
+  const toggleSongMode = useCallback(() => {
+    setSongMode((prev) => {
+      const next = !prev
+      if (next) {
+        setPhonemeMode(false)
+        clearPhonemeData()
+        analyzeSongText(content)
+      } else {
+        clearSongData()
+      }
+      return next
+    })
+  }, [content, analyzeSongText, clearSongData, clearPhonemeData])
+
+  // Phoneme mode toggle: mutually exclusive with song mode
+  const togglePhonemeMode = useCallback(() => {
+    setPhonemeMode((prev) => {
+      const next = !prev
+      if (next) {
+        setSongMode(false)
+        clearSongData()
+        analyzePhonemesText(content)
+      } else {
+        clearPhonemeData()
+      }
+      return next
+    })
+  }, [content, analyzePhonemesText, clearPhonemeData, clearSongData])
+
+  // Re-analyze when content changes while a mode is active
+  useEffect(() => {
+    if (songMode) {
+      analyzeSongText(content)
+    }
+  }, [content, songMode, analyzeSongText])
+
+  useEffect(() => {
+    if (phonemeMode) {
+      analyzePhonemesText(content)
+    }
+  }, [content, phonemeMode, analyzePhonemesText])
 
   // Install keyboard shortcuts (with focus mode + strikethrough + preview + help)
   useAppHotkeys({
@@ -240,6 +311,12 @@ const WriterContainer = () => {
     syntaxSets,
     highlightConfig,
     focusNavState,
+    songData,
+    visibleRhymeGroups,
+    songMode,
+    phonemeData,
+    phonemeConfig,
+    phonemeMode,
   }
 
   /**
@@ -353,6 +430,17 @@ const WriterContainer = () => {
           theme={theme}
           wordCount={content.split(/\s+/).filter(Boolean).length}
           onClose={() => setSyntaxPanelOpen(false)}
+          songMode={songMode}
+          onToggleSongMode={toggleSongMode}
+          songData={songData}
+          visibleRhymeGroups={visibleRhymeGroups}
+          setVisibleRhymeGroups={setVisibleRhymeGroups}
+          phonemeMode={phonemeMode}
+          onTogglePhonemeMode={togglePhonemeMode}
+          phonemeConfig={phonemeConfig}
+          setPhonemeConfig={setPhonemeConfig}
+          phonemeLevel={phonemeLevel}
+          setPhonemeLevel={setPhonemeLevel}
         />
       )}
 

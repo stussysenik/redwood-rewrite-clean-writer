@@ -6,14 +6,25 @@
  * backdrop-blur to let the writing surface show through subtly.
  *
  * Contains:
- * - PanelBody: the 12 word type toggles + quick stats
+ * - PanelBody: the 12 word type toggles + quick stats + mode toggles
+ * - SongPanel: song mode analysis (rhyme groups, flow metrics, syllables)
+ * - PhonemePanel: phoneme mode controls (level selector, category toggles)
  * - A close button for collapsing the panel
  *
  * The panel is 240px wide and fixed to the right edge of the viewport,
  * starting below the top and ending above the bottom toolbar.
  */
 import PanelBody from 'src/components/SyntaxPanel/PanelBody'
-import type { RisoTheme, SyntaxSets, HighlightConfig } from 'src/types/editor'
+import SongPanel from 'src/components/SyntaxPanel/SongPanel'
+import PhonemePanel from 'src/components/SyntaxPanel/PhonemePanel'
+import type {
+  RisoTheme,
+  SyntaxSets,
+  HighlightConfig,
+  SongAnalysis,
+  PhonemeHighlightConfig,
+  PhonemeLevel,
+} from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -32,6 +43,19 @@ interface SyntaxPanelProps {
   wordCount: number
   /** Called when user closes/collapses the panel */
   onClose: () => void
+  /** Song mode state */
+  songMode?: boolean
+  onToggleSongMode?: () => void
+  songData?: SongAnalysis | null
+  visibleRhymeGroups?: Set<number>
+  setVisibleRhymeGroups?: (groups: Set<number>) => void
+  /** Phoneme mode state */
+  phonemeMode?: boolean
+  onTogglePhonemeMode?: () => void
+  phonemeConfig?: PhonemeHighlightConfig
+  setPhonemeConfig?: (config: PhonemeHighlightConfig) => void
+  phonemeLevel?: PhonemeLevel
+  setPhonemeLevel?: (level: PhonemeLevel) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -51,6 +75,17 @@ const SyntaxPanel = ({
   theme,
   wordCount,
   onClose,
+  songMode = false,
+  onToggleSongMode,
+  songData,
+  visibleRhymeGroups,
+  setVisibleRhymeGroups,
+  phonemeMode = false,
+  onTogglePhonemeMode,
+  phonemeConfig,
+  setPhonemeConfig,
+  phonemeLevel,
+  setPhonemeLevel,
 }: SyntaxPanelProps) => {
   return (
     <div
@@ -94,7 +129,7 @@ const SyntaxPanel = ({
             opacity: 0.6,
           }}
         >
-          Syntax
+          {songMode ? 'Song' : phonemeMode ? 'Phoneme' : 'Syntax'}
         </span>
         <button
           onClick={onClose}
@@ -128,12 +163,38 @@ const SyntaxPanel = ({
 
       {/* Scrollable body */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
+        {/* Song panel (when song mode is active and data exists) */}
+        {songMode && songData && visibleRhymeGroups && setVisibleRhymeGroups && (
+          <SongPanel
+            songData={songData}
+            theme={theme}
+            visibleGroups={visibleRhymeGroups}
+            setVisibleGroups={setVisibleRhymeGroups}
+          />
+        )}
+
+        {/* Phoneme panel (when phoneme mode is active) */}
+        {phonemeMode && phonemeConfig && setPhonemeConfig && phonemeLevel && setPhonemeLevel && (
+          <PhonemePanel
+            theme={theme}
+            phonemeConfig={phonemeConfig}
+            setPhonemeConfig={setPhonemeConfig}
+            phonemeLevel={phonemeLevel}
+            setPhonemeLevel={setPhonemeLevel}
+          />
+        )}
+
+        {/* Standard syntax panel body (always shown) */}
         <PanelBody
           syntaxSets={syntaxSets}
           highlightConfig={highlightConfig}
           setHighlightConfig={setHighlightConfig}
           theme={theme}
           wordCount={wordCount}
+          songMode={songMode}
+          onToggleSongMode={onToggleSongMode}
+          phonemeMode={phonemeMode}
+          onTogglePhonemeMode={onTogglePhonemeMode}
         />
       </div>
     </div>

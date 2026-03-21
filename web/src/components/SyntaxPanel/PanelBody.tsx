@@ -5,6 +5,9 @@
  * shows a colored dot (matching the theme's highlight color for that type),
  * the category name, and its current count from the syntax analysis.
  *
+ * Also includes toggles for Song Mode (rhyme/syllable analysis) and
+ * Phoneme Mode (character-level phonemic classification).
+ *
  * Interactions:
  * - Click: toggle visibility of that category in highlightConfig
  * - Double-click: "solo" mode -- only that type is highlighted
@@ -32,6 +35,14 @@ interface PanelBodyProps {
   theme: RisoTheme
   /** Total word count for context */
   wordCount: number
+  /** Whether song mode is active */
+  songMode?: boolean
+  /** Toggle song mode on/off */
+  onToggleSongMode?: () => void
+  /** Whether phoneme mode is active */
+  phonemeMode?: boolean
+  /** Toggle phoneme mode on/off */
+  onTogglePhonemeMode?: () => void
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +81,10 @@ const PanelBody = ({
   setHighlightConfig,
   theme,
   wordCount,
+  songMode = false,
+  onToggleSongMode,
+  phonemeMode = false,
+  onTogglePhonemeMode,
 }: PanelBodyProps) => {
   const [statsOpen, setStatsOpen] = useState(true)
   const [hoveredKey, setHoveredKey] = useState<keyof HighlightConfig | null>(
@@ -285,9 +300,114 @@ const PanelBody = ({
           </div>
         )}
       </div>
+
+      {/* Mode toggles section */}
+      {(onToggleSongMode || onTogglePhonemeMode) && (
+        <div style={{ marginTop: '12px', borderTop: `1px solid ${theme.text}15`, paddingTop: '10px' }}>
+          <div
+            style={{
+              fontSize: '10px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              opacity: 0.5,
+              color: theme.text,
+              marginBottom: '6px',
+            }}
+          >
+            Analysis Modes
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {onToggleSongMode && (
+              <ModeToggleButton
+                label="Song Mode"
+                sublabel="Rhyme + Syllable"
+                isActive={songMode}
+                onToggle={onToggleSongMode}
+                theme={theme}
+              />
+            )}
+            {onTogglePhonemeMode && (
+              <ModeToggleButton
+                label="Phoneme Mode"
+                sublabel="Character-Level"
+                isActive={phonemeMode}
+                onToggle={onTogglePhonemeMode}
+                theme={theme}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
+// ---------------------------------------------------------------------------
+// Mode toggle button sub-component
+// ---------------------------------------------------------------------------
+
+const ModeToggleButton = ({
+  label,
+  sublabel,
+  isActive,
+  onToggle,
+  theme,
+}: {
+  label: string
+  sublabel: string
+  isActive: boolean
+  onToggle: () => void
+  theme: RisoTheme
+}) => (
+  <button
+    onClick={onToggle}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '6px 8px',
+      borderRadius: '6px',
+      border: 'none',
+      cursor: 'pointer',
+      backgroundColor: isActive ? `${theme.accent}20` : `${theme.text}05`,
+      color: theme.text,
+      transition: 'background 150ms ease',
+      width: '100%',
+    }}
+  >
+    <div style={{ textAlign: 'left' }}>
+      <div style={{ fontSize: '11px', fontWeight: isActive ? 700 : 400 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: '9px', opacity: 0.5 }}>{sublabel}</div>
+    </div>
+    {/* Toggle indicator */}
+    <div
+      style={{
+        width: '28px',
+        height: '14px',
+        borderRadius: '7px',
+        backgroundColor: isActive ? theme.accent : `${theme.text}20`,
+        position: 'relative',
+        transition: 'background 200ms ease',
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          width: '10px',
+          height: '10px',
+          borderRadius: '50%',
+          backgroundColor: isActive ? '#fff' : `${theme.text}60`,
+          position: 'absolute',
+          top: '2px',
+          left: isActive ? '16px' : '2px',
+          transition: 'left 200ms ease, background 200ms ease',
+        }}
+      />
+    </div>
+  </button>
+)
 
 // ---------------------------------------------------------------------------
 // Stat row sub-component
