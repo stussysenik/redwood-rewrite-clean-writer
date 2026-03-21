@@ -115,6 +115,8 @@ export interface SavedCustomTheme {
 
 export type ViewMode = "write" | "preview";
 
+export type WritingMode = 'typewriter' | 'journal' | 'chapters' | 'roman';
+
 export type FocusMode = "none" | "sentence" | "word" | "paragraph";
 
 export interface TextRange {

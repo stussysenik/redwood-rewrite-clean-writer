@@ -2,8 +2,11 @@
  * WriterContainer -- Assembled editor UI within WriterProvider context.
  *
  * Renders:
- * - Typewriter (the forward-only text editor)
+ * - Typewriter (the forward-only text editor with syntax highlighting)
  * - Toolbar (fixed bottom bar with theme, font, word count, actions)
+ *
+ * Phase 2: Wires the useSyntaxWorker hook to provide real-time NLP
+ * classification to the Typewriter's SyntaxBackdrop overlay.
  *
  * This component reads from WriterContext for content state and from
  * ThemeContext for visual theming. It bridges the two contexts to
@@ -16,7 +19,9 @@ import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useTheme } from 'src/context/ThemeContext'
 import { useWriter } from 'src/context/WriterContext'
 import { useAppHotkeys } from 'src/hooks/useAppHotkeys'
+import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
 import { FONT_OPTIONS, FONT_STORAGE_KEY } from 'src/lib/fonts'
+import type { HighlightConfig } from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -56,6 +61,25 @@ function getFontFamily(fontId: string): string {
 const WriterContainer = () => {
   const { theme } = useTheme()
   const { content, setContent } = useWriter()
+
+  // NLP syntax analysis via Web Worker (debounced 150ms)
+  const { syntaxSets } = useSyntaxWorker(content)
+
+  // Highlight config -- all syntax categories enabled by default
+  const [highlightConfig] = useState<HighlightConfig>({
+    nouns: true,
+    pronouns: true,
+    verbs: true,
+    adjectives: true,
+    adverbs: true,
+    prepositions: true,
+    conjunctions: true,
+    articles: true,
+    interjections: true,
+    urls: true,
+    numbers: true,
+    hashtags: true,
+  })
 
   // Font state -- persisted to localStorage
   const [fontId, setFontId] = useState(() =>
@@ -123,15 +147,15 @@ const WriterContainer = () => {
         <Typewriter
           content={content}
           onContentChange={setContent}
-          cursorColor={theme.cursor}
-          textColor={theme.text}
-          backgroundColor={theme.background}
+          theme={theme}
           fontFamily={fontFamily}
           fontSize={fontSize}
           maxWidth={800}
           lineHeight={lineHeight}
           letterSpacing={letterSpacing}
           paragraphSpacing={paragraphSpacing}
+          syntaxSets={syntaxSets}
+          highlightConfig={highlightConfig}
         />
       </div>
 
