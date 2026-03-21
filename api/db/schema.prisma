@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -92,8 +92,8 @@ model UserSettings {
   letterSpacing         Float     @default(0)
   paragraphSpacing      Float     @default(0.5)
 
-  // Syntax highlighting config (JSON string — SQLite has no Json type)
-  highlightConfig       String    @default("{\"nouns\":true,\"pronouns\":true,\"verbs\":true,\"adjectives\":true,\"adverbs\":true,\"prepositions\":true,\"conjunctions\":true,\"articles\":true,\"interjections\":true,\"urls\":true,\"numbers\":true,\"hashtags\":true}")
+  // Syntax highlighting config
+  highlightConfig       Json      @default("{\"nouns\":true,\"pronouns\":true,\"verbs\":true,\"adjectives\":true,\"adverbs\":true,\"prepositions\":true,\"conjunctions\":true,\"articles\":true,\"interjections\":true,\"urls\":true,\"numbers\":true,\"hashtags\":true}")
 
   // View / focus
   viewMode              String    @default("write")
@@ -113,10 +113,9 @@ model UserSettings {
   songRhymesCollapsed   Boolean   @default(false)
   songLinesCollapsed    Boolean   @default(true)
 
-  // JSON strings (SQLite)
-  wordTypeOrder         String?
-  themeOverrides        String    @default("{}")
-  themeNames            String    @default("{}")
+  wordTypeOrder         Json?
+  themeOverrides        Json      @default("{}")
+  themeNames            Json      @default("{}")
 
   // Sync timestamps
   lastSyncedAt          DateTime?
@@ -140,9 +139,8 @@ model CustomTheme {
   strikethroughColor String
   selectionColor    String
 
-  // JSON stored as String (SQLite)
-  highlightColors   String
-  rhymeColors       String?
+  highlightColors   Json
+  rhymeColors       Json?
 
   sortOrder         Int       @default(0)
 
@@ -163,8 +161,8 @@ model ThemeConfig {
   userId                   String    @unique
   user                     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  hiddenThemeIds           String    @default("[]")
-  themeOrder               String    @default("[]")
+  hiddenThemeIds           Json      @default("[]")
+  themeOrder               Json      @default("[]")
   hasCustomizedVisibility  Boolean   @default(false)
 
   lastSyncedAt             DateTime?
@@ -195,7 +193,7 @@ model Chapter {
 
 // ─── JournalEntry ─────────────────────────────────────────────────────────────
 // Daily journal entries for the "journal" writing mode. One entry per user per
-// date, enforced via unique constraint. Tags stored as JSON string (SQLite).
+// date, enforced via unique constraint.
 model JournalEntry {
   id          String    @id @default(cuid())
   userId      String
@@ -204,7 +202,7 @@ model JournalEntry {
   content     String    @default("")
   wordCount   Int       @default(0)
   mood        String?
-  tags        String    @default("[]")
+  tags        Json      @default("[]")
   prompt      String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
