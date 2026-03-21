@@ -38,6 +38,12 @@ interface ToolbarProps {
   onLetterSpacingChange: (v: number) => void
   paragraphSpacing: number
   onParagraphSpacingChange: (v: number) => void
+  // Focus mode + strikethrough
+  onStrikethrough?: () => void
+  focusModeActive?: boolean
+  // Preview toggle
+  onTogglePreview?: () => void
+  isPreviewActive?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -57,6 +63,10 @@ const Toolbar = ({
   onLetterSpacingChange,
   paragraphSpacing,
   onParagraphSpacingChange,
+  onStrikethrough,
+  focusModeActive = false,
+  onTogglePreview,
+  isPreviewActive = false,
 }: ToolbarProps) => {
   const { theme } = useTheme()
 
@@ -84,7 +94,12 @@ const Toolbar = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <ModeSelector />
           <WordCount />
-          <ActionButtons />
+          <ActionButtons
+            onStrikethrough={onStrikethrough}
+            focusModeActive={focusModeActive}
+            onTogglePreview={onTogglePreview}
+            isPreviewActive={isPreviewActive}
+          />
         </div>
 
         {/* Right section: settings button + font selector */}

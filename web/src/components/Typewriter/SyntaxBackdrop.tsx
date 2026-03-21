@@ -10,12 +10,14 @@
  * align pixel-for-pixel.
  *
  * Rendering algorithm:
- *   1. Split text on whitespace boundaries, preserving the whitespace tokens
- *   2. For each non-whitespace token, normalize via normalizeTokenForSyntaxLookup
- *   3. Check Set membership in priority order (URLs > hashtags > numbers > NLP)
- *   4. If matched AND the category is enabled in highlightConfig, render bold + colored
- *   5. Otherwise render in the default theme.text color
- *   6. Whitespace tokens render as-is to preserve formatting
+ *   1. Split text into segments: strikethrough blocks (~~...~~) and normal text
+ *   2. For normal text, split on whitespace boundaries preserving tokens
+ *   3. For each non-whitespace token, normalize via normalizeTokenForSyntaxLookup
+ *   4. Check Set membership in priority order (URLs > hashtags > numbers > NLP)
+ *   5. If matched AND the category is enabled in highlightConfig, render bold + colored
+ *   6. Otherwise render in the default theme.text color
+ *   7. Strikethrough text renders with line-through decoration + strikethrough color
+ *   8. Focus mode dims non-focused text to 0.3 opacity
  */
 import React, { useMemo } from 'react'
 
@@ -26,7 +28,13 @@ import {
   isUrlToken,
   normalizeTokenForSyntaxLookup,
 } from 'src/lib/syntaxPatterns'
-import type { HighlightConfig, RisoTheme, SyntaxSets } from 'src/types/editor'
+import type {
+  FocusNavState,
+  HighlightConfig,
+  RisoTheme,
+  SyntaxSets,
+  TextRange,
+} from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
 // Props
@@ -55,6 +63,87 @@ interface SyntaxBackdropProps {
   cursorColor: string
   /** Whether to show the cursor (true when textarea is focused) */
   showCursor: boolean
+  /** Focus navigation state (optional -- null/undefined means no focus mode) */
+  focusNavState?: FocusNavState | null
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * A text segment is either a strikethrough block or a normal text run.
+ * charOffset tracks where this segment starts in the original text string.
+ */
+interface TextSegment {
+  text: string
+  isStrikethrough: boolean
+  /** The content inside the markers (without ~~) for strikethrough segments */
+  innerText: string
+  charOffset: number
+}
+
+/**
+ * Split text into alternating segments of normal text and ~~strikethrough~~ blocks.
+ */
+function splitStrikethroughSegments(text: string): TextSegment[] {
+  const segments: TextSegment[] = []
+  const pattern = /~~(?:[^~]|~(?!~))+~~/g
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+
+  while ((match = pattern.exec(text)) !== null) {
+    // Normal text before this strikethrough block
+    if (match.index > lastIndex) {
+      const normalText = text.substring(lastIndex, match.index)
+      segments.push({
+        text: normalText,
+        isStrikethrough: false,
+        innerText: normalText,
+        charOffset: lastIndex,
+      })
+    }
+
+    // The strikethrough block itself
+    const fullMatch = match[0]
+    const inner = fullMatch.slice(2, -2) // strip ~~ markers
+    segments.push({
+      text: fullMatch,
+      isStrikethrough: true,
+      innerText: inner,
+      charOffset: match.index,
+    })
+
+    lastIndex = match.index + fullMatch.length
+  }
+
+  // Remaining normal text after the last strikethrough block
+  if (lastIndex < text.length) {
+    const remaining = text.substring(lastIndex)
+    segments.push({
+      text: remaining,
+      isStrikethrough: false,
+      innerText: remaining,
+      charOffset: lastIndex,
+    })
+  }
+
+  return segments
+}
+
+/**
+ * Check whether a character offset falls within the focused range.
+ * Returns true if the character should be rendered at full opacity.
+ */
+function isInFocusRange(
+  charOffset: number,
+  length: number,
+  focusedRange: TextRange | null
+): boolean {
+  if (!focusedRange) return true
+  const segEnd = charOffset + length
+  // Overlap check: segment intersects the focused range
+  return charOffset < focusedRange.end && segEnd > focusedRange.start
 }
 
 // ---------------------------------------------------------------------------
@@ -73,146 +162,216 @@ const SyntaxBackdrop = ({
   paragraphSpacing: _paragraphSpacing,
   cursorColor,
   showCursor,
+  focusNavState,
 }: SyntaxBackdropProps) => {
-  /**
-   * Render highlighted text spans.
-   *
-   * Performance: This is memoized on [text, syntaxSets, highlightConfig, theme]
-   * so it only re-computes when the text changes or a new analysis arrives.
-   * Typical re-render cost is O(n) where n = number of whitespace-split tokens.
-   */
-  const highlightedContent = useMemo(() => {
-    if (!text) return null
+  const focusActive = focusNavState && focusNavState.mode !== 'none'
+  const focusedRange = focusNavState?.focusedRange ?? null
 
-    // No syntax data yet -- render plain text
-    if (!syntaxSets) {
+  /**
+   * Render a single normal (non-strikethrough) token with syntax highlighting.
+   */
+  const renderSyntaxToken = (
+    token: string,
+    key: string | number,
+    dimmed: boolean
+  ) => {
+    // Whitespace tokens render as-is
+    if (/^\s+$/.test(token)) {
       return (
-        <span style={{ color: theme.text, transition: 'color 0.3s ease' }}>
-          {text}
-        </span>
+        <React.Fragment key={key}>
+          {token}
+        </React.Fragment>
       )
     }
 
-    // Split text preserving whitespace tokens: ["hello", " ", "world", "\n", ...]
-    const tokens = text.split(/(\s+)/)
+    const baseOpacity = dimmed ? 0.3 : 1
 
-    return tokens.map((token, index) => {
-      // Whitespace tokens render as-is (preserve formatting)
-      if (/^\s+$/.test(token)) {
-        return (
-          <React.Fragment key={index}>
-            {token}
-          </React.Fragment>
-        )
-      }
-
-      // Normalize for Set lookup
-      const normalized = normalizeTokenForSyntaxLookup(token)
-
-      if (!normalized) {
-        // Pure punctuation or empty after normalization
-        return (
-          <span
-            key={index}
-            style={{ color: theme.text, transition: 'color 0.3s ease' }}
-          >
-            {token}
-          </span>
-        )
-      }
-
-      // Check syntax categories in priority order
-      let color = theme.text
-      let isMatch = false
-
-      if (
-        highlightConfig.urls &&
-        (syntaxSets.urls.has(normalized) || isUrlToken(normalized))
-      ) {
-        color = theme.highlight.url
-        isMatch = true
-      } else if (
-        highlightConfig.hashtags &&
-        (syntaxSets.hashtags.has(normalized) || isHashtagToken(normalized))
-      ) {
-        color = theme.highlight.hashtag
-        isMatch = true
-      } else if (
-        highlightConfig.numbers &&
-        (syntaxSets.numbers.has(normalized) || isNumberToken(normalized))
-      ) {
-        color = theme.highlight.number
-        isMatch = true
-      } else if (
-        highlightConfig.articles &&
-        syntaxSets.articles.has(normalized)
-      ) {
-        color = theme.highlight.article
-        isMatch = true
-      } else if (
-        highlightConfig.verbs &&
-        syntaxSets.verbs.has(normalized)
-      ) {
-        color = theme.highlight.verb
-        isMatch = true
-      } else if (
-        highlightConfig.nouns &&
-        syntaxSets.nouns.has(normalized)
-      ) {
-        color = theme.highlight.noun
-        isMatch = true
-      } else if (
-        highlightConfig.adjectives &&
-        syntaxSets.adjectives.has(normalized)
-      ) {
-        color = theme.highlight.adjective
-        isMatch = true
-      } else if (
-        highlightConfig.adverbs &&
-        syntaxSets.adverbs.has(normalized)
-      ) {
-        color = theme.highlight.adverb
-        isMatch = true
-      } else if (
-        highlightConfig.pronouns &&
-        syntaxSets.pronouns.has(normalized)
-      ) {
-        color = theme.highlight.pronoun
-        isMatch = true
-      } else if (
-        highlightConfig.prepositions &&
-        syntaxSets.prepositions.has(normalized)
-      ) {
-        color = theme.highlight.preposition
-        isMatch = true
-      } else if (
-        highlightConfig.conjunctions &&
-        syntaxSets.conjunctions.has(normalized)
-      ) {
-        color = theme.highlight.conjunction
-        isMatch = true
-      } else if (
-        highlightConfig.interjections &&
-        syntaxSets.interjections.has(normalized)
-      ) {
-        color = theme.highlight.interjection
-        isMatch = true
-      }
-
+    // No syntax data -- render plain
+    if (!syntaxSets) {
       return (
         <span
-          key={index}
+          key={key}
           style={{
-            color: isMatch ? color : theme.text,
-            fontWeight: isMatch ? 700 : 'inherit',
-            transition: 'color 0.3s ease',
+            color: theme.text,
+            opacity: baseOpacity,
+            transition: 'color 0.3s ease, opacity 0.2s ease',
           }}
         >
           {token}
         </span>
       )
+    }
+
+    const normalized = normalizeTokenForSyntaxLookup(token)
+
+    if (!normalized) {
+      return (
+        <span
+          key={key}
+          style={{
+            color: theme.text,
+            opacity: baseOpacity,
+            transition: 'color 0.3s ease, opacity 0.2s ease',
+          }}
+        >
+          {token}
+        </span>
+      )
+    }
+
+    // Check syntax categories in priority order
+    let color = theme.text
+    let isMatch = false
+
+    if (
+      highlightConfig.urls &&
+      (syntaxSets.urls.has(normalized) || isUrlToken(normalized))
+    ) {
+      color = theme.highlight.url
+      isMatch = true
+    } else if (
+      highlightConfig.hashtags &&
+      (syntaxSets.hashtags.has(normalized) || isHashtagToken(normalized))
+    ) {
+      color = theme.highlight.hashtag
+      isMatch = true
+    } else if (
+      highlightConfig.numbers &&
+      (syntaxSets.numbers.has(normalized) || isNumberToken(normalized))
+    ) {
+      color = theme.highlight.number
+      isMatch = true
+    } else if (
+      highlightConfig.articles &&
+      syntaxSets.articles.has(normalized)
+    ) {
+      color = theme.highlight.article
+      isMatch = true
+    } else if (
+      highlightConfig.verbs &&
+      syntaxSets.verbs.has(normalized)
+    ) {
+      color = theme.highlight.verb
+      isMatch = true
+    } else if (
+      highlightConfig.nouns &&
+      syntaxSets.nouns.has(normalized)
+    ) {
+      color = theme.highlight.noun
+      isMatch = true
+    } else if (
+      highlightConfig.adjectives &&
+      syntaxSets.adjectives.has(normalized)
+    ) {
+      color = theme.highlight.adjective
+      isMatch = true
+    } else if (
+      highlightConfig.adverbs &&
+      syntaxSets.adverbs.has(normalized)
+    ) {
+      color = theme.highlight.adverb
+      isMatch = true
+    } else if (
+      highlightConfig.pronouns &&
+      syntaxSets.pronouns.has(normalized)
+    ) {
+      color = theme.highlight.pronoun
+      isMatch = true
+    } else if (
+      highlightConfig.prepositions &&
+      syntaxSets.prepositions.has(normalized)
+    ) {
+      color = theme.highlight.preposition
+      isMatch = true
+    } else if (
+      highlightConfig.conjunctions &&
+      syntaxSets.conjunctions.has(normalized)
+    ) {
+      color = theme.highlight.conjunction
+      isMatch = true
+    } else if (
+      highlightConfig.interjections &&
+      syntaxSets.interjections.has(normalized)
+    ) {
+      color = theme.highlight.interjection
+      isMatch = true
+    }
+
+    return (
+      <span
+        key={key}
+        style={{
+          color: isMatch ? color : theme.text,
+          fontWeight: isMatch ? 700 : 'inherit',
+          opacity: baseOpacity,
+          transition: 'color 0.3s ease, opacity 0.2s ease',
+        }}
+      >
+        {token}
+      </span>
+    )
+  }
+
+  /**
+   * Render highlighted text spans with strikethrough + focus support.
+   */
+  const highlightedContent = useMemo(() => {
+    if (!text) return null
+
+    // Split into strikethrough and normal segments
+    const segments = splitStrikethroughSegments(text)
+
+    return segments.map((segment, segIdx) => {
+      if (segment.isStrikethrough) {
+        // Render strikethrough block with line-through decoration
+        const inFocus = !focusActive || isInFocusRange(
+          segment.charOffset,
+          segment.text.length,
+          focusedRange
+        )
+        const dimmed = focusActive && !inFocus
+
+        return (
+          <span
+            key={`st-${segIdx}`}
+            style={{
+              color: theme.strikethrough,
+              textDecoration: 'line-through',
+              opacity: dimmed ? 0.3 : 0.6,
+              transition: 'color 0.3s ease, opacity 0.2s ease',
+            }}
+          >
+            {segment.innerText}
+          </span>
+        )
+      }
+
+      // Normal text: split by whitespace and render each token
+      const tokens = segment.innerText.split(/(\s+)/)
+
+      // Track character offset within this segment for focus dimming
+      let tokenCharOffset = segment.charOffset
+
+      return tokens.map((token, tokenIdx) => {
+        const tokenStart = tokenCharOffset
+        tokenCharOffset += token.length
+
+        const inFocus = !focusActive || isInFocusRange(
+          tokenStart,
+          token.length,
+          focusedRange
+        )
+        const dimmed = !!(focusActive && !inFocus)
+
+        return renderSyntaxToken(
+          token,
+          `${segIdx}-${tokenIdx}`,
+          dimmed
+        )
+      })
     })
-  }, [text, syntaxSets, highlightConfig, theme])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, syntaxSets, highlightConfig, theme, focusActive, focusedRange])
 
   return (
     <div

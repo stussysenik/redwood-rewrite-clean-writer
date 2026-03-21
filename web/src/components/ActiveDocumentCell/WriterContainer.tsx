@@ -8,6 +8,8 @@
  * Phase 2: Wires the useSyntaxWorker hook to provide real-time NLP
  * classification to the Typewriter's SyntaxBackdrop overlay.
  *
+ * v0.6.0: Focus mode + strikethrough with magic clean.
+ *
  * This component reads from WriterContext for content state and from
  * ThemeContext for visual theming. It bridges the two contexts to
  * provide props to the Typewriter component.
@@ -15,17 +17,22 @@
 import { useState, useCallback, useEffect } from 'react'
 
 import ChaptersEditor from 'src/components/ChaptersMode/ChaptersEditor'
+import HelpModal from 'src/components/HelpModal/HelpModal'
 import JournalEditor from 'src/components/JournalMode/JournalEditor'
+import MarkdownPreview from 'src/components/MarkdownPreview/MarkdownPreview'
 import RomanEditor from 'src/components/RomanMode/RomanEditor'
+import SyntaxPanel, { PANEL_WIDTH } from 'src/components/SyntaxPanel/SyntaxPanel'
 import Toolbar from 'src/components/Toolbar/Toolbar'
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useTheme } from 'src/context/ThemeContext'
 import { useWriter } from 'src/context/WriterContext'
 import { useWritingMode } from 'src/context/WritingModeContext'
 import { useAppHotkeys } from 'src/hooks/useAppHotkeys'
+import { useFocusNavigation } from 'src/hooks/useFocusNavigation'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
 import { FONT_OPTIONS, FONT_STORAGE_KEY } from 'src/lib/fonts'
-import type { HighlightConfig } from 'src/types/editor'
+import type { FocusMode, HighlightConfig, ViewMode } from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -114,6 +121,24 @@ const WriterContainer = () => {
     hashtags: true,
   })
 
+  // Focus mode state
+  const [focusMode, setFocusMode] = useState<FocusMode>('none')
+
+  // Focus navigation hook
+  const {
+    focusNavState,
+    handleFocusKeyDown,
+    applyStrikethroughAtFocus,
+    cycleFocusMode,
+  } = useFocusNavigation({
+    content,
+    focusMode,
+    setFocusMode,
+    setContent,
+  })
+
+  const focusModeActive = focusMode !== 'none'
+
   // Font state -- persisted to localStorage
   const [fontId, setFontId] = useState(() =>
     readStorage(FONT_STORAGE_KEY, DEFAULT_FONT_ID)
@@ -136,8 +161,15 @@ const WriterContainer = () => {
   // Settings panel visibility
   const [settingsOpen, setSettingsOpen] = useState(false)
 
-  // Install keyboard shortcuts
-  useAppHotkeys({ content, setContent })
+  // Install keyboard shortcuts (with focus mode + strikethrough support)
+  useAppHotkeys({
+    content,
+    setContent,
+    cycleFocusMode,
+    handleFocusKeyDown,
+    applyStrikethroughAtFocus,
+    focusModeActive,
+  })
 
   // Persist font choice
   const handleFontChange = useCallback((newFontId: string) => {
@@ -186,6 +218,7 @@ const WriterContainer = () => {
     paragraphSpacing,
     syntaxSets,
     highlightConfig,
+    focusNavState,
   }
 
   /**
@@ -241,6 +274,29 @@ const WriterContainer = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Focus mode indicator */}
+      {focusModeActive && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 8,
+            right: 16,
+            padding: '4px 12px',
+            fontSize: '11px',
+            fontFamily: '"Space Mono", monospace',
+            fontWeight: 'bold',
+            color: theme.accent,
+            opacity: 0.6,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            zIndex: 100,
+            pointerEvents: 'none',
+          }}
+        >
+          Focus: {focusMode}
+        </div>
+      )}
+
       {/* Mode-specific editor fills available space */}
       <div style={{ flex: 1 }}>
         {renderEditor()}
@@ -260,6 +316,8 @@ const WriterContainer = () => {
         onLetterSpacingChange={setLetterSpacing}
         paragraphSpacing={paragraphSpacing}
         onParagraphSpacingChange={setParagraphSpacing}
+        onStrikethrough={applyStrikethroughAtFocus}
+        focusModeActive={focusModeActive}
       />
     </div>
   )

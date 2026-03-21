@@ -29,7 +29,12 @@ import {
   isUrlToken,
   normalizeTokenForSyntaxLookup,
 } from 'src/lib/syntaxPatterns'
-import type { HighlightConfig, RisoTheme, SyntaxSets } from 'src/types/editor'
+import type {
+  FocusNavState,
+  HighlightConfig,
+  RisoTheme,
+  SyntaxSets,
+} from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
 // Known non-text keys that should be rejected (except Enter which is handled)
@@ -109,6 +114,8 @@ interface TypewriterProps {
   syntaxSets?: SyntaxSets | null
   /** Per-category toggle for which syntax types are highlighted */
   highlightConfig?: HighlightConfig
+  /** Focus navigation state for focus mode dimming */
+  focusNavState?: FocusNavState | null
 }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +153,7 @@ const Typewriter = ({
   paragraphSpacing: paragraphSpacingProp = 0.5,
   syntaxSets = null,
   highlightConfig = DEFAULT_HIGHLIGHT_CONFIG,
+  focusNavState = null,
 }: TypewriterProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
@@ -332,6 +340,7 @@ const Typewriter = ({
           paragraphSpacing={paragraphSpacingProp}
           cursorColor={lastWordSyntaxColor}
           showCursor={isFocused}
+          focusNavState={focusNavState}
         />
 
         {/* Layer 2: Hidden input capture (must match SyntaxBackdrop font metrics) */}
