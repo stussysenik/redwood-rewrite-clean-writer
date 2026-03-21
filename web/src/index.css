@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Golden Ratio CSS Custom Properties */
+:root {
+  --phi: 1.618;
+  --space-xs: 8px;
+  --space-sm: 13px;
+  --space-md: 21px;
+  --space-lg: 34px;
+  --space-xl: 55px;
+  --space-xxl: 89px;
+
+  /* Theme colors (overridden by ThemeContext) */
+  --bg-color: #FDFBF7;
+  --text-color: #333333;
+  --accent-color: #F15060;
+  --cursor-color: #F15060;
+  --selection-color: rgba(241,80,96,0.2);
+  --strikethrough-color: #F15060;
+}
+
+/* Selection color */
+::selection {
+  background: var(--selection-color);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 3px;
+  opacity: 0.4;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Body defaults */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
