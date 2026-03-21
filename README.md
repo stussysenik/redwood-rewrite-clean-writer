@@ -1,122 +1,172 @@
-# README
+<p align="center">
+  <img src="web/public/icon-512.png" width="128" alt="Clean Writer" />
+</p>
 
-Welcome to [RedwoodJS](https://redwoodjs.com)!
+<h1 align="center">Clean Writer</h1>
 
-> **Prerequisites**
->
-> - Redwood requires [Node.js](https://nodejs.org/en/) (=20.x) and [Yarn](https://yarnpkg.com/)
-> - Are you on Windows? For best results, follow our [Windows development setup](https://redwoodjs.com/docs/how-to/windows-development-setup) guide
+<p align="center">
+  A distraction-free writing app that sees your words in color.
+</p>
 
-Start by installing dependencies:
+<p align="center">
+  <a href="https://redwoodjs.com"><img src="https://img.shields.io/badge/RedwoodJS-8.9-BF4722?style=flat-square&logo=redwoodjs" alt="RedwoodJS" /></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react" alt="React" /></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=flat-square&logo=tailwindcss" alt="Tailwind CSS" /></a>
+  <a href="https://www.postgresql.org"><img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
+  <a href="https://web.dev/progressive-web-apps"><img src="https://img.shields.io/badge/PWA-ready-5A0FC8?style=flat-square&logo=pwa" alt="PWA" /></a>
+  <a href="https://railway.app"><img src="https://img.shields.io/badge/deploy-Railway-0B0D0E?style=flat-square&logo=railway" alt="Railway" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/stussysenik/redwood-rewrite-clean-writer?style=flat-square" alt="License" /></a>
+</p>
 
-```
+<!-- Add hero screenshot: screenshots/editor-classic.png -->
+
+Clean Writer is a full-stack writing app built for flow. It highlights your words by part of speech in real-time, analyzes rhyme schemes and phonetics, and stays out of your way while you write. Four writing modes adapt to your workflow — from daily journaling to novel-length manuscripts.
+
+## Features
+
+- **[4 Writing Modes](#writing-modes)** — Typewriter, Journal, Chapters, and Roman (manuscript)
+- **[Real-time NLP Highlighting](#syntax-highlighting)** — 12 parts of speech colored via Web Workers
+- **[Song Mode](#song-mode)** — Rhyme scheme detection, syllable counting, flow metrics
+- **[Phoneme Mode](#phoneme-mode)** — Character-level phonetics with CMU dictionary
+- **[15 Themes + Custom](#themes)** — Hand-crafted palettes with OKLCH perceptual color science
+- **[16 Fonts](#typography)** — Mono, sans-serif, serif, and handwriting
+- **[Focus Modes](#focus-modes)** — Sentence, word, and paragraph isolation
+- **[PWA + Offline](#getting-started)** — Install on any device, works without internet
+- **[Keyboard-First](#keyboard-shortcuts)** — Full shortcut system with holdable Tab overlay
+
+## Writing Modes
+
+Clean Writer adapts to how you write, not the other way around.
+
+| Mode | Purpose |
+|------|---------|
+| **Typewriter** | Forward-only. Backspace is blocked. Just write. |
+| **Journal** | One entry per day. Calendar navigation. Mood tags. |
+| **Chapters** | Multi-chapter sidebar. Drag to reorder. |
+| **Roman** | Novel-length manuscripts with parts, daily word goals, and session tracking. |
+
+> [!TIP]
+> Typewriter mode blocks the backspace key on purpose. Use strikethrough (`Cmd+Shift+X`) to mark mistakes, then clean struck text later with `Cmd+Shift+K`.
+
+<!-- Add writing modes screenshot: screenshots/writing-modes.png -->
+
+## Syntax Highlighting
+
+Every word is classified in real-time across 12 parts of speech — nouns, verbs, adjectives, adverbs, pronouns, prepositions, conjunctions, articles, interjections, URLs, numbers, and hashtags. Analysis runs in a dedicated Web Worker so typing never stutters.
+
+Toggle categories with number keys `1`–`9`, or double-click to solo a single type.
+
+## Song Mode
+
+Analyze your writing as lyrics. Clean Writer detects rhyme schemes (AABB, ABAB, ABBA, free verse), counts syllables per line, and calculates flow metrics — rhyme density, internal rhymes, multi-syllabic rhymes, and longest rhyme chains. Rhyme groups are color-coded and can be toggled individually.
+
+> [!NOTE]
+> Rhyme detection uses the CMU Pronouncing Dictionary with consonant family normalization for near-rhyme support.
+
+<!-- Add song mode screenshot: screenshots/song-mode.png -->
+
+## Phoneme Mode
+
+Character-level phonemic visualization. Drill down by syllable, phoneme, or character and toggle categories: vowels, plosives, fricatives, nasals, liquids, glides, stressed and unstressed syllables. Powered by the CMU dictionary with bit-flag classification for efficient rendering.
+
+## Themes
+
+15 built-in themes span light and dark palettes. Highlight and rhyme colors are auto-generated using OKLCH for perceptual uniformity and WCAG contrast compliance.
+
+Create custom themes with the built-in customizer — pick base colors, choose a color harmony (complementary, analogous, triadic, split-complementary, tetradic), and the highlight palette generates automatically.
+
+<!-- Add themes screenshot: screenshots/themes-grid.png -->
+
+<details>
+<summary>Built-in themes</summary>
+
+Classic, Blueprint, Midnight, Sepia, Paper, Terminal, Warmth, Ocean, Forest, Flexoki Light, Flexoki Dark, Apple Music, Spotify, SoundCloud, Deezer
+
+</details>
+
+## Typography
+
+16 fonts across four categories: **Mono** (Courier Prime, Space Mono, JetBrains Mono, Fira Code, IBM Plex Mono), **Sans-serif** (Inter, DM Sans, Plus Jakarta Sans, Helvetica, Rubik, System), **Serif** (Lora, Merriweather, Playfair Display, EB Garamond), and **Handwriting** (Caveat). Fine-tune font size, line height, letter spacing, and paragraph spacing.
+
+## Focus Modes
+
+Isolate your attention at the sentence, word, or paragraph level. Navigate with arrow keys — surrounding text fades out so you can concentrate on what matters.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20.x
+- Yarn 4.x
+- PostgreSQL 14+
+
+### Setup
+
+```bash
+git clone https://github.com/stussysenik/redwood-rewrite-clean-writer.git
+cd redwood-rewrite-clean-writer
 yarn install
 ```
 
-Then start the development server:
+Create a `.env` file in the project root:
 
-```
-yarn redwood dev
-```
-
-Your browser should automatically open to [http://localhost:8910](http://localhost:8910) where you'll see the Welcome Page, which links out to many great resources.
-
-> **The Redwood CLI**
->
-> Congratulations on running your first Redwood CLI command! From dev to deploy, the CLI is with you the whole way. And there's quite a few commands at your disposal:
->
-> ```
-> yarn redwood --help
-> ```
->
-> For all the details, see the [CLI reference](https://redwoodjs.com/docs/cli-commands).
-
-## Prisma and the database
-
-Redwood wouldn't be a full-stack framework without a database. It all starts with the schema. Open the [`schema.prisma`](api/db/schema.prisma) file in `api/db` and replace the `UserExample` model with the following `Post` model:
-
-```prisma
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  body      String
-  createdAt DateTime @default(now())
-}
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/clean_writer"
+SESSION_SECRET="your-session-secret-at-least-32-chars"
 ```
 
-Redwood uses [Prisma](https://www.prisma.io/), a next-gen Node.js and TypeScript ORM, to talk to the database. Prisma's schema offers a declarative way of defining your app's data models. And Prisma [Migrate](https://www.prisma.io/migrate) uses that schema to make database migrations hassle-free:
+Run migrations and start the dev server:
 
-```
+```bash
 yarn rw prisma migrate dev
-
-# ...
-
-? Enter a name for the new migration: › create posts
+yarn rw dev
 ```
 
-> `rw` is short for `redwood`
+> [!NOTE]
+> The app runs at [localhost:8910](http://localhost:8910). Sign up for an account to start writing.
 
-You'll be prompted for the name of your migration. `create posts` will do.
+## Deploy
 
-Now let's generate everything we need to perform all the CRUD (Create, Retrieve, Update, Delete) actions on our `Post` model:
+Clean Writer deploys to [Railway](https://railway.app) with zero config:
 
-```
-yarn redwood generate scaffold post
-```
-
-Navigate to [http://localhost:8910/posts/new](http://localhost:8910/posts/new), fill in the title and body, and click "Save".
-
-Did we just create a post in the database? Yup! With `yarn rw generate scaffold <model>`, Redwood created all the pages, components, and services necessary to perform all CRUD actions on our posts table.
-
-## Frontend first with Storybook
-
-Don't know what your data models look like? That's more than ok—Redwood integrates Storybook so that you can work on design without worrying about data. Mockup, build, and verify your React components, even in complete isolation from the backend:
-
-```
-yarn rw storybook
+```bash
+railway up
 ```
 
-Seeing "Couldn't find any stories"? That's because you need a `*.stories.{tsx,jsx}` file. The Redwood CLI makes getting one easy enough—try generating a [Cell](https://redwoodjs.com/docs/cells), Redwood's data-fetching abstraction:
+The deploy command runs `prisma migrate deploy` before starting the server.
 
-```
-yarn rw generate cell examplePosts
-```
+## Keyboard Shortcuts
 
-The Storybook server should hot reload and now you'll have four stories to work with. They'll probably look a little bland since there's no styling. See if the Redwood CLI's `setup ui` command has your favorite styling library:
+| Shortcut | Action |
+|----------|--------|
+| `Cmd+Shift+X` | Strikethrough |
+| `Cmd+Shift+K` | Clean struck text |
+| `Cmd+Shift+D` | Delete all |
+| `Cmd+Shift+E` | Export markdown |
+| `Cmd+Shift+P` | Toggle preview |
+| `Cmd+Shift+F` | Cycle focus mode |
+| `1`–`9` | Toggle word type highlights |
+| Hold `Tab` | Show shortcut overlay |
+| `Arrow keys` | Navigate focus mode |
+| `Escape` | Exit focus mode |
 
-```
-yarn rw setup ui --help
-```
+## Tech Stack
 
-## Testing with Jest
+| Layer | Technology |
+|-------|-----------|
+| Framework | [RedwoodJS](https://redwoodjs.com) 8.9 |
+| Frontend | React 18, Tailwind CSS 3.4 |
+| Backend | GraphQL (Yoga), Prisma ORM |
+| Database | PostgreSQL |
+| Auth | dbAuth (self-hosted, cookie-based) |
+| NLP | [compromise.js](https://compromise.cool), CMU dictionary |
+| Color Science | OKLCH perceptual color space |
+| Deploy | [Railway](https://railway.app) |
 
-It'd be hard to scale from side project to startup without a few tests. Redwood fully integrates Jest with both the front- and back-ends, and makes it easy to keep your whole app covered by generating test files with all your components and services:
+## Contributing
 
-```
-yarn rw test
-```
+Contributions are welcome. Please open an issue first to discuss what you'd like to change.
 
-To make the integration even more seamless, Redwood augments Jest with database [scenarios](https://redwoodjs.com/docs/testing#scenarios) and [GraphQL mocking](https://redwoodjs.com/docs/testing#mocking-graphql-calls).
+## License
 
-## Ship it
-
-Redwood is designed for both serverless deploy targets like Netlify and Vercel and serverful deploy targets like Render and AWS:
-
-```
-yarn rw setup deploy --help
-```
-
-Don't go live without auth! Lock down your app with Redwood's built-in, database-backed authentication system ([dbAuth](https://redwoodjs.com/docs/authentication#self-hosted-auth-installation-and-setup)), or integrate with nearly a dozen third-party auth providers:
-
-```
-yarn rw setup auth --help
-```
-
-## Next Steps
-
-The best way to learn Redwood is by going through the comprehensive [tutorial](https://redwoodjs.com/docs/tutorial/foreword) and joining the community (via the [Discourse forum](https://community.redwoodjs.com) or the [Discord server](https://discord.gg/redwoodjs)).
-
-## Quick Links
-
-- Stay updated: read [Forum announcements](https://community.redwoodjs.com/c/announcements/5), follow us on [Twitter](https://twitter.com/redwoodjs), and subscribe to the [newsletter](https://redwoodjs.com/newsletter)
-- [Learn how to contribute](https://redwoodjs.com/docs/contributing)
+[MIT](LICENSE)
