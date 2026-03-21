@@ -193,21 +193,31 @@ const SortableThemeDot = ({
         aria-checked={isActive}
         aria-label={theme.name}
         style={{
-          width: '20px',
-          height: '20px',
-          borderRadius: '50%',
-          backgroundColor: theme.accent,
+          background: 'none',
           border: 'none',
           cursor: isCustom ? 'grab' : 'pointer',
-          padding: 0,
-          outline: isActive
-            ? `2px solid ${ringColor}`
-            : '2px solid transparent',
-          outlineOffset: '2px',
-          transition: 'outline-color 150ms ease, transform 150ms ease',
-          transform: isActive ? 'scale(1.15)' : 'scale(1)',
+          padding: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
-      />
+      >
+        <span
+          style={{
+            display: 'block',
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            backgroundColor: theme.accent,
+            outline: isActive
+              ? `2px solid ${ringColor}`
+              : '2px solid transparent',
+            outlineOffset: '2px',
+            transition: 'outline-color 150ms ease, transform 150ms ease',
+            transform: isActive ? 'scale(1.15)' : 'scale(1)',
+          }}
+        />
+      </button>
       {/* Delete button for custom themes on hover */}
       {isCustom && hovered && onDelete && (
         <button
@@ -394,23 +404,33 @@ const ThemeSelector = () => {
               title="Create custom theme"
               aria-label="Create custom theme"
               style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                backgroundColor: 'transparent',
-                border: `1.5px dashed ${isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'}`,
+                background: 'none',
+                border: 'none',
                 cursor: 'pointer',
-                padding: 0,
+                padding: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                lineHeight: 1,
               }}
             >
-              +
+              <span
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  backgroundColor: 'transparent',
+                  border: `1.5px dashed ${isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'}`,
+                  color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  lineHeight: 1,
+                }}
+              >
+                +
+              </span>
             </button>
           </div>
         </SortableContext>

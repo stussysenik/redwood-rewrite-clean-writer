@@ -151,7 +151,7 @@ const JournalCalendar = ({
     color: theme.accent,
     cursor: 'pointer',
     fontSize: '14px',
-    padding: '2px 6px',
+    padding: '10px 12px',
     opacity: 0.8,
   }
 
@@ -256,7 +256,7 @@ const JournalCalendar = ({
                     : `${theme.text}40`,
                 border: 'none',
                 borderRadius: '4px',
-                padding: '4px 0',
+                padding: '10px 4px',
                 fontSize: '11px',
                 fontWeight: isToday || isSelected ? 700 : 400,
                 cursor: 'pointer',

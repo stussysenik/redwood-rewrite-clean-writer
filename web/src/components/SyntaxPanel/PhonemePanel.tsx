@@ -137,7 +137,7 @@ const PhonemePanel = ({
               onClick={() => handleLevelChange(key)}
               style={{
                 flex: 1,
-                padding: '6px 4px',
+                padding: '10px 4px',
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: '10px',
@@ -186,7 +186,7 @@ const PhonemePanel = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '5px 6px',
+                  padding: '10px 8px',
                   background: 'none',
                   border: 'none',
                   borderRadius: '4px',

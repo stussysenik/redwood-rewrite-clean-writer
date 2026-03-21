@@ -124,7 +124,7 @@ const ConfirmDialog = ({
           <button
             onClick={onCancel}
             style={{
-              padding: '8px 16px',
+              padding: '12px 16px',
               fontSize: '14px',
               fontWeight: 'bold',
               opacity: 0.5,
@@ -139,7 +139,7 @@ const ConfirmDialog = ({
           <button
             onClick={onConfirm}
             style={{
-              padding: '8px 24px',
+              padding: '12px 24px',
               fontSize: '14px',
               fontWeight: 'bold',
               color: 'white',

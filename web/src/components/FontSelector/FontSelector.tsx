@@ -37,7 +37,7 @@ const FontSelector = ({
         backgroundColor,
         border: `1px solid ${textColor}`,
         borderRadius: '4px',
-        padding: '4px 8px',
+        padding: '10px 12px',
         fontSize: '13px',
         cursor: 'pointer',
         outline: 'none',

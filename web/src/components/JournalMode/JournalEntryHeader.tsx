@@ -101,7 +101,7 @@ const JournalEntryHeader = ({
     cursor: 'pointer',
     fontSize: '13px',
     fontWeight: 500,
-    padding: '4px 8px',
+    padding: '10px 14px',
     borderRadius: '4px',
     transition: 'opacity 0.15s ease',
     opacity: 0.8,
@@ -184,7 +184,7 @@ const JournalEntryHeader = ({
               style={{
                 ...buttonStyle,
                 fontSize: '12px',
-                padding: '2px 8px',
+                padding: '10px 14px',
                 border: `1px solid ${theme.accent}40`,
                 borderRadius: '10px',
               }}

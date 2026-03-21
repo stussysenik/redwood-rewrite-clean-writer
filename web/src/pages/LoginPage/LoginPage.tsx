@@ -92,8 +92,8 @@ const LoginPage = () => {
           <TextField
             name="email"
             ref={emailRef}
-            className="w-full px-3 py-2 rounded text-sm outline-none transition-colors"
-            errorClassName="w-full px-3 py-2 rounded text-sm outline-none border-red-400"
+            className="w-full px-3 py-3 rounded text-sm outline-none transition-colors"
+            errorClassName="w-full px-3 py-3 rounded text-sm outline-none border-red-400"
             style={{
               border: '1px solid #DDD8D0',
               color: '#333333',
@@ -120,8 +120,8 @@ const LoginPage = () => {
           </Label>
           <PasswordField
             name="password"
-            className="w-full px-3 py-2 rounded text-sm outline-none transition-colors"
-            errorClassName="w-full px-3 py-2 rounded text-sm outline-none border-red-400"
+            className="w-full px-3 py-3 rounded text-sm outline-none transition-colors"
+            errorClassName="w-full px-3 py-3 rounded text-sm outline-none border-red-400"
             style={{
               border: '1px solid #DDD8D0',
               color: '#333333',
@@ -141,7 +141,7 @@ const LoginPage = () => {
           <div className="text-right mt-1">
             <Link
               to={routes.forgotPassword()}
-              className="text-xs hover:underline"
+              className="text-xs hover:underline inline-block py-3 px-1"
               style={{ color: '#F15060' }}
             >
               Forgot password?
@@ -150,7 +150,7 @@ const LoginPage = () => {
 
           <div className="mt-6">
             <Submit
-              className="w-full py-2 rounded text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+              className="w-full py-3 rounded text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#F15060' }}
             >
               Sign In
@@ -164,7 +164,7 @@ const LoginPage = () => {
         Don&apos;t have an account?{' '}
         <Link
           to={routes.signup()}
-          className="font-medium hover:underline"
+          className="font-medium hover:underline inline-block py-3 px-1"
           style={{ color: '#F15060' }}
         >
           Sign up

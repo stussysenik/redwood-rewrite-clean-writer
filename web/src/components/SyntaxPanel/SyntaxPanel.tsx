@@ -140,7 +140,7 @@ const SyntaxPanel = ({
             cursor: 'pointer',
             color: theme.text,
             opacity: 0.4,
-            padding: '2px',
+            padding: '12px',
             display: 'flex',
             alignItems: 'center',
           }}

@@ -113,7 +113,7 @@ const MoodTagPicker = ({
                   ? `1px solid ${theme.accent}`
                   : '1px solid transparent',
               borderRadius: '6px',
-              padding: '4px 6px',
+              padding: '10px 10px',
               fontSize: '18px',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
@@ -170,7 +170,7 @@ const MoodTagPicker = ({
                 border: 'none',
                 color: theme.accent,
                 cursor: 'pointer',
-                padding: '0 2px',
+                padding: '6px 8px',
                 fontSize: '14px',
                 lineHeight: 1,
                 opacity: 0.6,

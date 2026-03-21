@@ -186,7 +186,7 @@ const SettingsPanel = ({
               cursor: 'pointer',
               color: theme.text,
               opacity: 0.4,
-              padding: '4px',
+              padding: '12px',
             }}
           >
             <svg
@@ -264,7 +264,7 @@ const SettingsPanel = ({
           }}
           style={{
             width: '100%',
-            padding: '8px',
+            padding: '12px 16px',
             marginTop: '8px',
             fontSize: '11px',
             fontFamily: '"Space Mono", monospace',

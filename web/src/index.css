@@ -12,6 +12,10 @@
   --space-xl: 55px;
   --space-xxl: 89px;
 
+  /* Czech gov.cz design system: touch target + spacing */
+  --touch-min: 44px;
+  --spacing-unit: 15px;
+
   /* Theme colors (overridden by ThemeContext) */
   --bg-color: #FDFBF7;
   --text-color: #333333;
@@ -19,6 +23,36 @@
   --cursor-color: #F15060;
   --selection-color: rgba(241,80,96,0.2);
   --strikethrough-color: #F15060;
+}
+
+/*
+ * WCAG 2.5.5 / Apple HIG: 44px minimum touch targets.
+ * Applied globally as a safety net; inline styles in components
+ * provide the actual sizing via padding increases.
+ */
+button,
+[role="button"],
+select {
+  min-height: var(--touch-min);
+}
+
+input:not([type="hidden"]),
+textarea {
+  min-height: var(--touch-min);
+}
+
+/* Range inputs: larger track + thumb for touch */
+input[type="range"] {
+  min-height: 32px;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
 }
 
 /* Selection color */

@@ -208,7 +208,7 @@ const ChapterSidebar = ({
         color: theme.text,
         opacity: disabled ? 0.15 : 0.4,
         cursor: disabled ? 'default' : 'pointer',
-        padding: '2px',
+        padding: '10px',
         fontSize: '11px',
         lineHeight: 1,
         display: 'flex',
@@ -244,7 +244,7 @@ const ChapterSidebar = ({
             opacity: 0.5,
             cursor: 'pointer',
             fontSize: '14px',
-            padding: '4px',
+            padding: '12px',
           }}
         >
           {/* Right-pointing chevron */}
@@ -314,7 +314,7 @@ const ChapterSidebar = ({
                 opacity: 0.4,
                 cursor: 'pointer',
                 fontSize: '12px',
-                padding: '4px',
+                padding: '12px',
               }}
             >
               {/* Left-pointing chevron */}
@@ -341,7 +341,7 @@ const ChapterSidebar = ({
                 key={chapter.id}
                 onClick={() => onSelectChapter(chapter.id)}
                 style={{
-                  padding: '8px 12px',
+                  padding: '12px 12px',
                   cursor: 'pointer',
                   backgroundColor: isActive ? `${theme.accent}15` : 'transparent',
                   borderLeft: isActive
@@ -435,7 +435,7 @@ const ChapterSidebar = ({
             onClick={onAddChapter}
             style={{
               width: '100%',
-              padding: '6px 12px',
+              padding: '12px 16px',
               fontSize: '12px',
               fontFamily: '"Space Mono", monospace',
               fontWeight: 500,

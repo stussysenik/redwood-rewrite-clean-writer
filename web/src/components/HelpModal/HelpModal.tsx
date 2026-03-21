@@ -143,7 +143,7 @@ const HelpModal = ({ isOpen, onClose, theme }: HelpModalProps) => {
               cursor: 'pointer',
               color: theme.text,
               opacity: 0.4,
-              padding: '4px',
+              padding: '12px',
               display: 'flex',
               alignItems: 'center',
             }}

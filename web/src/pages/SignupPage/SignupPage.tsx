@@ -88,8 +88,8 @@ const SignupPage = () => {
           <TextField
             name="email"
             ref={emailRef}
-            className="w-full px-3 py-2 rounded text-sm outline-none transition-colors"
-            errorClassName="w-full px-3 py-2 rounded text-sm outline-none border-red-400"
+            className="w-full px-3 py-3 rounded text-sm outline-none transition-colors"
+            errorClassName="w-full px-3 py-3 rounded text-sm outline-none border-red-400"
             style={{
               border: '1px solid #DDD8D0',
               color: '#333333',
@@ -116,8 +116,8 @@ const SignupPage = () => {
           </Label>
           <PasswordField
             name="password"
-            className="w-full px-3 py-2 rounded text-sm outline-none transition-colors"
-            errorClassName="w-full px-3 py-2 rounded text-sm outline-none border-red-400"
+            className="w-full px-3 py-3 rounded text-sm outline-none transition-colors"
+            errorClassName="w-full px-3 py-3 rounded text-sm outline-none border-red-400"
             style={{
               border: '1px solid #DDD8D0',
               color: '#333333',
@@ -136,7 +136,7 @@ const SignupPage = () => {
 
           <div className="mt-6">
             <Submit
-              className="w-full py-2 rounded text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+              className="w-full py-3 rounded text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#F15060' }}
             >
               Sign Up
@@ -150,7 +150,7 @@ const SignupPage = () => {
         Already have an account?{' '}
         <Link
           to={routes.login()}
-          className="font-medium hover:underline"
+          className="font-medium hover:underline inline-block py-3 px-1"
           style={{ color: '#F15060' }}
         >
           Sign in
