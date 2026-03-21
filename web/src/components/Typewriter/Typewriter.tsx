@@ -97,6 +97,12 @@ interface TypewriterProps {
   fontSize?: string
   /** Max width of the writing area in pixels */
   maxWidth?: number
+  /** CSS line-height (unitless ratio, e.g. 1.6) */
+  lineHeight?: number
+  /** CSS letter-spacing in px (e.g. 0, 1.5) */
+  letterSpacing?: number
+  /** Paragraph spacing in em (applied as margin-bottom on newline blocks) */
+  paragraphSpacing?: number
 }
 
 // ---------------------------------------------------------------------------
@@ -112,6 +118,9 @@ const Typewriter = ({
   fontFamily,
   fontSize = '18px',
   maxWidth = 800,
+  lineHeight: lineHeightProp = 1.6,
+  letterSpacing: letterSpacingProp = 0,
+  paragraphSpacing: _paragraphSpacing = 0.5,
 }: TypewriterProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
@@ -226,7 +235,8 @@ const Typewriter = ({
         color: textColor,
         fontFamily,
         fontSize,
-        lineHeight: 1.6,
+        lineHeight: lineHeightProp,
+        letterSpacing: letterSpacingProp !== 0 ? `${letterSpacingProp}px` : undefined,
         minHeight: '100%',
         cursor: 'text',
         padding: '2rem 1rem',
@@ -246,7 +256,7 @@ const Typewriter = ({
           style={{
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
-            minHeight: '1.6em',
+            minHeight: `${lineHeightProp}em`,
           }}
         >
           {displayText}
@@ -284,7 +294,8 @@ const Typewriter = ({
             margin: 0,
             fontFamily,
             fontSize,
-            lineHeight: 1.6,
+            lineHeight: lineHeightProp,
+            letterSpacing: letterSpacingProp !== 0 ? `${letterSpacingProp}px` : undefined,
           }}
         />
       </div>
