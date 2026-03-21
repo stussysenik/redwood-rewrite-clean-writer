@@ -1,6 +1,7 @@
 import { Router, Route, Set, Private } from '@redwoodjs/router'
 
 import AuthLayout from 'src/layouts/AuthLayout/AuthLayout'
+import WriterLayout from 'src/layouts/WriterLayout/WriterLayout'
 
 import { useAuth } from './auth'
 
@@ -15,9 +16,11 @@ const Routes = () => {
         <Route path="/reset-password" page={ResetPasswordPage} name="resetPassword" />
       </Set>
 
-      {/* Authenticated routes */}
+      {/* Authenticated routes wrapped in WriterLayout (theme provider) */}
       <Private unauthenticated="login">
-        <Route path="/write" page={WriterPage} name="writer" />
+        <Set wrap={WriterLayout}>
+          <Route path="/write" page={WriterPage} name="writer" />
+        </Set>
       </Private>
 
       {/* Home redirects to /write or /login based on auth state */}
