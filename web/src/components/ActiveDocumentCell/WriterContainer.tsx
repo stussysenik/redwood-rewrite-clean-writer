@@ -14,6 +14,8 @@
  */
 import { useState, useCallback, useEffect } from 'react'
 
+import ChaptersEditor from 'src/components/ChaptersMode/ChaptersEditor'
+import JournalEditor from 'src/components/JournalMode/JournalEditor'
 import Toolbar from 'src/components/Toolbar/Toolbar'
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useTheme } from 'src/context/ThemeContext'
@@ -89,7 +91,7 @@ const ModeLabel = ({
 
 const WriterContainer = () => {
   const { theme } = useTheme()
-  const { content, setContent } = useWriter()
+  const { content, setContent, documentId } = useWriter()
   const { mode } = useWritingMode()
 
   // NLP syntax analysis via Web Worker (debounced 150ms)
@@ -194,17 +196,30 @@ const WriterContainer = () => {
     switch (mode) {
       case 'journal':
         return (
-          <>
-            <ModeLabel label="Journal" theme={theme} />
-            <Typewriter {...typewriterProps} />
-          </>
+          <JournalEditor
+            theme={theme}
+            syntaxSets={syntaxSets}
+            highlightConfig={highlightConfig}
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            lineHeight={lineHeight}
+            letterSpacing={letterSpacing}
+            paragraphSpacing={paragraphSpacing}
+          />
         )
       case 'chapters':
         return (
-          <>
-            <ModeLabel label="Chapters" theme={theme} />
-            <Typewriter {...typewriterProps} />
-          </>
+          <ChaptersEditor
+            documentId={documentId}
+            theme={theme}
+            syntaxSets={syntaxSets}
+            highlightConfig={highlightConfig}
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            lineHeight={lineHeight}
+            letterSpacing={letterSpacing}
+            paragraphSpacing={paragraphSpacing}
+          />
         )
       case 'roman':
         return (
