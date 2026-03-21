@@ -13,6 +13,7 @@
  * the writing area.
  */
 import FontSelector from 'src/components/FontSelector/FontSelector'
+import ModeSelector from 'src/components/ModeSelector/ModeSelector'
 import SettingsPanel from 'src/components/SettingsPanel/SettingsPanel'
 import ThemeSelector from 'src/components/ThemeSelector/ThemeSelector'
 import ActionButtons from 'src/components/Toolbar/ActionButtons'
@@ -79,8 +80,9 @@ const Toolbar = ({
         {/* Left section: theme selector */}
         <ThemeSelector />
 
-        {/* Center section: word count + actions */}
+        {/* Center section: mode selector + word count + actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <ModeSelector />
           <WordCount />
           <ActionButtons />
         </div>

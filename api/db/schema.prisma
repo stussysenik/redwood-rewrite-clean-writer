@@ -22,10 +22,11 @@ model User {
   deletedAt           DateTime?
 
   // Relations
-  documents   Document[]
-  settings    UserSettings?
-  customThemes CustomTheme[]
-  themeConfig ThemeConfig?
+  documents      Document[]
+  settings       UserSettings?
+  customThemes   CustomTheme[]
+  themeConfig    ThemeConfig?
+  journalEntries JournalEntry[]
 }
 
 // ─── Document ────────────────────────────────────────────────────────────────
@@ -40,6 +41,7 @@ model Document {
   content         String    @default("")
   version         Int       @default(1)
   checksum        String?
+  writingMode     String    @default("typewriter")
   wordCount       Int       @default(0)
   charCount       Int       @default(0)
 
@@ -51,6 +53,7 @@ model Document {
 
   // Relations
   snapshots DocumentSnapshot[]
+  chapters  Chapter[]
 
   @@index([userId, deletedAt])
   @@index([userId, updatedAt])
@@ -167,4 +170,47 @@ model ThemeConfig {
   lastSyncedAt             DateTime?
   clientUpdatedAt          DateTime?
   updatedAt                DateTime  @updatedAt
+}
+
+// ─── Chapter ──────────────────────────────────────────────────────────────────
+// Chapters belong to a document when using "chapters" or "roman" writing modes.
+// Soft-deletable via `deletedAt`. Ordering is managed by `sortOrder`.
+model Chapter {
+  id          String    @id @default(cuid())
+  documentId  String
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  title       String    @default("Untitled Chapter")
+  content     String    @default("")
+  sortOrder   Int       @default(0)
+  wordCount   Int       @default(0)
+  charCount   Int       @default(0)
+  partNumber  Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([documentId, sortOrder])
+  @@index([documentId, deletedAt])
+}
+
+// ─── JournalEntry ─────────────────────────────────────────────────────────────
+// Daily journal entries for the "journal" writing mode. One entry per user per
+// date, enforced via unique constraint. Tags stored as JSON string (SQLite).
+model JournalEntry {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entryDate   DateTime
+  content     String    @default("")
+  wordCount   Int       @default(0)
+  mood        String?
+  tags        String    @default("[]")
+  prompt      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([userId, entryDate])
+  @@index([userId, deletedAt])
+  @@index([userId, entryDate])
 }

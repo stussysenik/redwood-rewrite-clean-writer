@@ -9,6 +9,7 @@
  * This layout is used for all authenticated /write routes.
  */
 import { ThemeProvider, useTheme } from 'src/context/ThemeContext'
+import { WritingModeProvider } from 'src/context/WritingModeContext'
 
 interface WriterLayoutProps {
   children: React.ReactNode
@@ -43,7 +44,9 @@ const WriterShell = ({ children }: { children: React.ReactNode }) => {
 const WriterLayout = ({ children }: WriterLayoutProps) => {
   return (
     <ThemeProvider>
-      <WriterShell>{children}</WriterShell>
+      <WritingModeProvider>
+        <WriterShell>{children}</WriterShell>
+      </WritingModeProvider>
     </ThemeProvider>
   )
 }

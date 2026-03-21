@@ -16,6 +16,7 @@ export const schema = gql`
     title: String!
     content: String!
     version: Int!
+    writingMode: String!
     wordCount: Int!
     charCount: Int!
     createdAt: DateTime!
@@ -31,11 +32,13 @@ export const schema = gql`
   input CreateDocumentInput {
     title: String
     content: String
+    writingMode: String
   }
 
   input UpdateDocumentInput {
     title: String
     content: String
+    writingMode: String
   }
 
   type Mutation {

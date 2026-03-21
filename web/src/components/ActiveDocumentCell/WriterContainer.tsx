@@ -18,6 +18,7 @@ import Toolbar from 'src/components/Toolbar/Toolbar'
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useTheme } from 'src/context/ThemeContext'
 import { useWriter } from 'src/context/WriterContext'
+import { useWritingMode } from 'src/context/WritingModeContext'
 import { useAppHotkeys } from 'src/hooks/useAppHotkeys'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
 import { FONT_OPTIONS, FONT_STORAGE_KEY } from 'src/lib/fonts'
@@ -58,9 +59,38 @@ function getFontFamily(fontId: string): string {
 // Component
 // ---------------------------------------------------------------------------
 
+/**
+ * Placeholder editor wrapper for modes not yet fully implemented.
+ * Shows a mode label banner above the standard Typewriter editor,
+ * so each mode is visually distinct while sharing the same editing core.
+ */
+const ModeLabel = ({
+  label,
+  theme,
+}: {
+  label: string
+  theme: { text: string; accent: string }
+}) => (
+  <div
+    style={{
+      padding: '8px 16px',
+      fontSize: '12px',
+      fontWeight: 600,
+      color: theme.accent,
+      opacity: 0.7,
+      borderBottom: `1px solid ${theme.text}15`,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+    }}
+  >
+    {label} Mode
+  </div>
+)
+
 const WriterContainer = () => {
   const { theme } = useTheme()
   const { content, setContent } = useWriter()
+  const { mode } = useWritingMode()
 
   // NLP syntax analysis via Web Worker (debounced 150ms)
   const { syntaxSets } = useSyntaxWorker(content)
@@ -140,23 +170,60 @@ const WriterContainer = () => {
   const fontFamily = getFontFamily(fontId)
   const fontSize = `${18 + fontSizeOffset}px`
 
+  // Shared Typewriter props for all modes
+  const typewriterProps = {
+    content,
+    onContentChange: setContent,
+    theme,
+    fontFamily,
+    fontSize,
+    maxWidth: 800,
+    lineHeight,
+    letterSpacing,
+    paragraphSpacing,
+    syntaxSets,
+    highlightConfig,
+  }
+
+  /**
+   * Render the mode-specific editor content.
+   * Currently journal/chapters/roman show a mode label above the standard
+   * Typewriter as placeholders until their dedicated editors are built.
+   */
+  const renderEditor = () => {
+    switch (mode) {
+      case 'journal':
+        return (
+          <>
+            <ModeLabel label="Journal" theme={theme} />
+            <Typewriter {...typewriterProps} />
+          </>
+        )
+      case 'chapters':
+        return (
+          <>
+            <ModeLabel label="Chapters" theme={theme} />
+            <Typewriter {...typewriterProps} />
+          </>
+        )
+      case 'roman':
+        return (
+          <>
+            <ModeLabel label="Roman" theme={theme} />
+            <Typewriter {...typewriterProps} />
+          </>
+        )
+      case 'typewriter':
+      default:
+        return <Typewriter {...typewriterProps} />
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Typewriter fills available space */}
+      {/* Mode-specific editor fills available space */}
       <div style={{ flex: 1 }}>
-        <Typewriter
-          content={content}
-          onContentChange={setContent}
-          theme={theme}
-          fontFamily={fontFamily}
-          fontSize={fontSize}
-          maxWidth={800}
-          lineHeight={lineHeight}
-          letterSpacing={letterSpacing}
-          paragraphSpacing={paragraphSpacing}
-          syntaxSets={syntaxSets}
-          highlightConfig={highlightConfig}
-        />
+        {renderEditor()}
       </div>
 
       {/* Fixed bottom toolbar */}

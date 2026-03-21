@@ -92,6 +92,7 @@ export const createDocument: MutationResolvers['createDocument'] = async ({
       userId: context.currentUser!.id,
       title: input.title ?? 'Untitled',
       content,
+      writingMode: input.writingMode ?? 'typewriter',
       wordCount: countWords(content),
       charCount: countChars(content),
     },
@@ -128,6 +129,7 @@ export const updateDocument: MutationResolvers['updateDocument'] = async ({
     data: {
       title: newTitle,
       content: newContent,
+      writingMode: input.writingMode ?? existing.writingMode,
       version: { increment: 1 },
       wordCount: countWords(newContent),
       charCount: countChars(newContent),
