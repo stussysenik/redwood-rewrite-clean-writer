@@ -19,9 +19,9 @@ import type {
   RhymeGroup,
   FlowMetrics,
   RhymeScheme,
-} from 'src/types/editor'
+} from '../types/editor'
 
-import { RHYME_COLORS } from 'src/lib/themes'
+import { RHYME_COLORS } from './themes'
 
 /**
  * CMU dictionary type -- injected by worker when available.

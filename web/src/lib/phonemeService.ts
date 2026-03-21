@@ -18,7 +18,7 @@ import {
   type PhonemeCategory,
   type PhonemeHighlightConfig,
   type PhonemeLevel,
-} from 'src/types/editor'
+} from '../types/editor'
 
 // ---------------------------------------------------------------------------
 // Bit constants shorthand
