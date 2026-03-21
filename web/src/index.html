@@ -3,9 +3,13 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#FDFBF7" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#FF6B35" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&family=Space+Mono&family=JetBrains+Mono&family=Fira+Code&family=IBM+Plex+Mono&family=Inter:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&family=Rubik:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;600&family=EB+Garamond:wght@400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet" />
@@ -14,6 +18,21 @@
 <body>
   <!-- Please keep this div empty -->
   <div id="redwood-app"></div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker
+          .register('/sw.js', { scope: '/' })
+          .then(function (reg) {
+            console.log('[SW] Registered, scope:', reg.scope);
+          })
+          .catch(function (err) {
+            console.warn('[SW] Registration failed:', err);
+          });
+      });
+    }
+  </script>
 </body>
 
 </html>
