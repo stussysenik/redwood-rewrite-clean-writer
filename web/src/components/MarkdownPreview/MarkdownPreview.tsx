@@ -83,7 +83,7 @@ const MarkdownPreview = ({
       style={{
         maxWidth: 800,
         margin: '0 auto',
-        padding: '40px 24px 120px',
+        padding: '24px 16px 80px',
         minHeight: '100vh',
         color: theme.text,
         fontFamily,

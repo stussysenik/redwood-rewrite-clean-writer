@@ -221,7 +221,7 @@ const ManuscriptNav = ({
                     opacity: 0.7,
                     fontSize: '11px',
                     fontWeight: 600,
-                    padding: '4px 8px',
+                    padding: '10px 12px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -262,7 +262,7 @@ const ManuscriptNav = ({
                           color: theme.text,
                           opacity: isActive ? 1 : 0.6,
                           fontSize: '11px',
-                          padding: '4px 8px 4px 24px',
+                          padding: '10px 12px 10px 24px',
                           cursor: 'pointer',
                           textAlign: 'left',
                           display: 'flex',
@@ -305,7 +305,7 @@ const ManuscriptNav = ({
                       color: theme.accent,
                       opacity: 0.5,
                       fontSize: '10px',
-                      padding: '2px 8px 2px 24px',
+                      padding: '10px 12px 10px 24px',
                       cursor: 'pointer',
                       textAlign: 'left',
                     }}
@@ -339,7 +339,7 @@ const ManuscriptNav = ({
             color: theme.accent,
             fontSize: '11px',
             fontWeight: 600,
-            padding: '6px 8px',
+            padding: '10px 12px',
             cursor: 'pointer',
           }}
         >
@@ -355,7 +355,7 @@ const ManuscriptNav = ({
             color: theme.text,
             opacity: 0.6,
             fontSize: '11px',
-            padding: '6px 8px',
+            padding: '10px 12px',
             cursor: 'pointer',
           }}
         >

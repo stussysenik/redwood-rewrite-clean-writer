@@ -113,7 +113,7 @@ const EditableGoal = ({
           borderRadius: '3px',
           color: theme.text,
           fontSize: '11px',
-          padding: '1px 4px',
+          padding: '8px 12px',
           textAlign: 'right',
           outline: 'none',
         }}

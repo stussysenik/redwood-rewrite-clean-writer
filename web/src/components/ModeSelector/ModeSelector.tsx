@@ -21,6 +21,8 @@ import type { WritingMode } from 'src/types/editor'
 interface ModeOption {
   id: WritingMode
   label: string
+  /** Abbreviated label for compact/mobile display */
+  shortLabel: string
   /** Short description shown as tooltip. */
   tooltip: string
 }
@@ -29,21 +31,25 @@ const MODES: ModeOption[] = [
   {
     id: 'typewriter',
     label: 'Typewriter',
+    shortLabel: 'Type',
     tooltip: 'Forward-only distraction-free writing',
   },
   {
     id: 'journal',
     label: 'Journal',
+    shortLabel: 'Jrnl',
     tooltip: 'Daily journal entries with date navigation',
   },
   {
     id: 'chapters',
     label: 'Chapters',
+    shortLabel: 'Chpt',
     tooltip: 'Multi-chapter document editing',
   },
   {
     id: 'roman',
     label: 'Roman',
+    shortLabel: 'Rmn',
     tooltip: 'Novel-length writing with parts and chapters',
   },
 ]
@@ -52,7 +58,7 @@ const MODES: ModeOption[] = [
 // Component
 // ---------------------------------------------------------------------------
 
-const ModeSelector = () => {
+const ModeSelector = ({ compact = false }: { compact?: boolean }) => {
   const { mode, setMode } = useWritingMode()
   const { theme } = useTheme()
 
@@ -80,7 +86,7 @@ const ModeSelector = () => {
               color: isActive ? theme.background : theme.text,
               border: 'none',
               borderRadius: '4px',
-              padding: '4px 10px',
+              padding: '10px 14px',
               fontSize: '11px',
               fontWeight: isActive ? 600 : 400,
               cursor: 'pointer',
@@ -89,7 +95,7 @@ const ModeSelector = () => {
               whiteSpace: 'nowrap',
             }}
           >
-            {option.label}
+            {compact ? option.shortLabel : option.label}
           </button>
         )
       })}
