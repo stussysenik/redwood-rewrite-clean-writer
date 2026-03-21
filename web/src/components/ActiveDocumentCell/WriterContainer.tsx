@@ -16,6 +16,7 @@ import { useState, useCallback, useEffect } from 'react'
 
 import ChaptersEditor from 'src/components/ChaptersMode/ChaptersEditor'
 import JournalEditor from 'src/components/JournalMode/JournalEditor'
+import RomanEditor from 'src/components/RomanMode/RomanEditor'
 import Toolbar from 'src/components/Toolbar/Toolbar'
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useTheme } from 'src/context/ThemeContext'
@@ -223,10 +224,14 @@ const WriterContainer = () => {
         )
       case 'roman':
         return (
-          <>
-            <ModeLabel label="Roman" theme={theme} />
-            <Typewriter {...typewriterProps} />
-          </>
+          <RomanEditor
+            documentId={documentId}
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            lineHeight={lineHeight}
+            letterSpacing={letterSpacing}
+            paragraphSpacing={paragraphSpacing}
+          />
         )
       case 'typewriter':
       default:
