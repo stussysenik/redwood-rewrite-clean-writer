@@ -106,7 +106,7 @@ const WriterContainer = () => {
   const { syntaxSets } = useSyntaxWorker(content)
 
   // Highlight config -- all syntax categories enabled by default
-  const [highlightConfig] = useState<HighlightConfig>({
+  const [highlightConfig, setHighlightConfig] = useState<HighlightConfig>({
     nouns: true,
     pronouns: true,
     verbs: true,
@@ -120,6 +120,18 @@ const WriterContainer = () => {
     numbers: true,
     hashtags: true,
   })
+
+  // View mode: 'write' or 'preview'
+  const [viewMode, setViewMode] = useState<ViewMode>('write')
+
+  // Help modal visibility
+  const [helpVisible, setHelpVisible] = useState(false)
+
+  // Syntax panel visibility (desktop only)
+  const [syntaxPanelOpen, setSyntaxPanelOpen] = useState(true)
+
+  // Responsive breakpoint for syntax panel
+  const { isDesktop } = useResponsiveBreakpoint()
 
   // Focus mode state
   const [focusMode, setFocusMode] = useState<FocusMode>('none')
@@ -161,7 +173,12 @@ const WriterContainer = () => {
   // Settings panel visibility
   const [settingsOpen, setSettingsOpen] = useState(false)
 
-  // Install keyboard shortcuts (with focus mode + strikethrough support)
+  // Toggle preview callback
+  const togglePreview = useCallback(() => {
+    setViewMode((prev) => (prev === 'write' ? 'preview' : 'write'))
+  }, [])
+
+  // Install keyboard shortcuts (with focus mode + strikethrough + preview + help)
   useAppHotkeys({
     content,
     setContent,
@@ -169,6 +186,10 @@ const WriterContainer = () => {
     handleFocusKeyDown,
     applyStrikethroughAtFocus,
     focusModeActive,
+    onTogglePreview: togglePreview,
+    onSetHelpVisible: setHelpVisible,
+    highlightConfig,
+    setHighlightConfig,
   })
 
   // Persist font choice
@@ -272,6 +293,9 @@ const WriterContainer = () => {
     }
   }
 
+  // Whether to show the syntax panel
+  const showSyntaxPanel = isDesktop && viewMode === 'write' && syntaxPanelOpen
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Focus mode indicator */}
@@ -280,7 +304,7 @@ const WriterContainer = () => {
           style={{
             position: 'fixed',
             top: 8,
-            right: 16,
+            right: showSyntaxPanel ? PANEL_WIDTH + 32 : 16,
             padding: '4px 12px',
             fontSize: '11px',
             fontFamily: '"Space Mono", monospace',
@@ -291,16 +315,53 @@ const WriterContainer = () => {
             letterSpacing: '0.05em',
             zIndex: 100,
             pointerEvents: 'none',
+            transition: 'right 200ms ease',
           }}
         >
           Focus: {focusMode}
         </div>
       )}
 
-      {/* Mode-specific editor fills available space */}
-      <div style={{ flex: 1 }}>
-        {renderEditor()}
+      {/* Mode-specific editor or markdown preview */}
+      <div
+        style={{
+          flex: 1,
+          paddingRight: showSyntaxPanel ? PANEL_WIDTH + 32 : 0,
+          transition: 'padding-right 200ms ease',
+        }}
+      >
+        {viewMode === 'preview' ? (
+          <MarkdownPreview
+            content={content}
+            theme={theme}
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            lineHeight={lineHeight}
+            onBackToWriting={togglePreview}
+          />
+        ) : (
+          renderEditor()
+        )}
       </div>
+
+      {/* Syntax panel (desktop only, write mode only) */}
+      {isDesktop && viewMode === 'write' && syntaxPanelOpen && (
+        <SyntaxPanel
+          syntaxSets={syntaxSets}
+          highlightConfig={highlightConfig}
+          setHighlightConfig={setHighlightConfig}
+          theme={theme}
+          wordCount={content.split(/\s+/).filter(Boolean).length}
+          onClose={() => setSyntaxPanelOpen(false)}
+        />
+      )}
+
+      {/* Help modal */}
+      <HelpModal
+        isOpen={helpVisible}
+        onClose={() => setHelpVisible(false)}
+        theme={theme}
+      />
 
       {/* Fixed bottom toolbar */}
       <Toolbar
@@ -318,6 +379,8 @@ const WriterContainer = () => {
         onParagraphSpacingChange={setParagraphSpacing}
         onStrikethrough={applyStrikethroughAtFocus}
         focusModeActive={focusModeActive}
+        onTogglePreview={togglePreview}
+        isPreviewActive={viewMode === 'preview'}
       />
     </div>
   )
