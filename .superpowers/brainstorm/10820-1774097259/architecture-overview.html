@@ -1,0 +1,218 @@
+<h2>Clean Writer RedwoodJS Rewrite — Architecture Overview</h2>
+<p class="subtitle">Full-stack rewrite: React 19 + Vite → RedwoodJS + PostgreSQL + dbAuth</p>
+
+<div class="section">
+  <h3>System Architecture</h3>
+  <div class="mockup">
+    <div class="mockup-header">5-Layer Architecture</div>
+    <div class="mockup-body" style="font-family: monospace; font-size: 13px; line-height: 1.6; padding: 20px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- Client Side -->
+        <div style="border: 2px solid #4a9eff; border-radius: 8px; padding: 16px;">
+          <div style="text-align: center; font-weight: bold; color: #4a9eff; margin-bottom: 12px;">🖥️ CLIENT (Browser)</div>
+
+          <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+            <div style="color: #e94560; font-weight: bold;">PRESENTATION</div>
+            <div style="color: #aaa; font-size: 11px;">Pages • Cells • Components • Layouts</div>
+            <div style="color: #888; font-size: 10px; margin-top: 4px;">WriterPage → ActiveDocumentCell → Typewriter</div>
+            <div style="color: #888; font-size: 10px;">UnifiedSyntaxPanel • ThemeCustomizer • Toolbar</div>
+          </div>
+
+          <div style="text-align: center; color: #555;">↕</div>
+
+          <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+            <div style="color: #f5a623; font-weight: bold;">STATE</div>
+            <div style="color: #aaa; font-size: 11px;">React Context • Custom Hooks • Web Workers</div>
+            <div style="color: #888; font-size: 10px; margin-top: 4px;">WriterContext → useAppHotkeys, useSyntaxWorker</div>
+            <div style="color: #888; font-size: 10px;">useFocusNavigation • useCustomTheme • useHarmonicaDrag</div>
+          </div>
+
+          <div style="text-align: center; color: #555;">↕</div>
+
+          <div style="background: #1a1a2e; padding: 10px; border-radius: 6px;">
+            <div style="color: #50fa7b; font-weight: bold;">STORAGE (Local)</div>
+            <div style="color: #aaa; font-size: 11px;">localStorage Write-Ahead Cache • Service Worker</div>
+            <div style="color: #888; font-size: 10px; margin-top: 4px;">28 localStorage keys → instant writes</div>
+            <div style="color: #888; font-size: 10px;">SyncManager queue → coalesces & flushes</div>
+          </div>
+        </div>
+
+        <!-- Server Side -->
+        <div style="border: 2px solid #50fa7b; border-radius: 8px; padding: 16px;">
+          <div style="text-align: center; font-weight: bold; color: #50fa7b; margin-bottom: 12px;">⚡ SERVER (RedwoodJS API)</div>
+
+          <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+            <div style="color: #bd93f9; font-weight: bold;">DATA (GraphQL API)</div>
+            <div style="color: #aaa; font-size: 11px;">SDL • Services • Resolvers • @requireAuth</div>
+            <div style="color: #888; font-size: 10px; margin-top: 4px;">documents.sdl.ts → documents.ts service</div>
+            <div style="color: #888; font-size: 10px;">userSettings.sdl.ts → userSettings.ts</div>
+            <div style="color: #888; font-size: 10px;">sync.sdl.ts → syncBatch mutation</div>
+          </div>
+
+          <div style="text-align: center; color: #555;">↕</div>
+
+          <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+            <div style="color: #ff79c6; font-weight: bold;">SYNC</div>
+            <div style="color: #aaa; font-size: 11px;">Conflict Resolution • Version Control • Migration</div>
+            <div style="color: #888; font-size: 10px; margin-top: 4px;">Document: server-wins + local snapshot stash</div>
+            <div style="color: #888; font-size: 10px;">Settings: last-write-wins by clientUpdatedAt</div>
+          </div>
+
+          <div style="text-align: center; color: #555;">↕</div>
+
+          <div style="background: #1a1a2e; padding: 10px; border-radius: 6px;">
+            <div style="color: #8be9fd; font-weight: bold;">STORAGE (PostgreSQL)</div>
+            <div style="color: #aaa; font-size: 11px;">Prisma ORM • Railway Managed DB</div>
+            <div style="color: #888; font-size: 10px; margin-top: 4px;">User • Document • DocumentSnapshot</div>
+            <div style="color: #888; font-size: 10px;">UserSettings • CustomTheme • ThemeConfig</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connection Arrow -->
+      <div style="text-align: center; margin: 16px 0; color: #f8f8f2;">
+        <div style="display: inline-block; background: #282a36; padding: 8px 16px; border-radius: 4px; border: 1px solid #44475a;">
+          <span style="color: #50fa7b;">←</span> GraphQL over HTTPS + Cookie Auth (dbAuth) <span style="color: #50fa7b;">→</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Data Models (Prisma)</h3>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-family: monospace; font-size: 11px;">
+    <div style="background: #1a1a2e; padding: 12px; border-radius: 6px; border-left: 3px solid #e94560;">
+      <div style="color: #e94560; font-weight: bold;">User</div>
+      <div style="color: #888;">id, email, hashedPassword</div>
+      <div style="color: #888;">salt, resetToken</div>
+      <div style="color: #666; margin-top: 4px;">→ has one UserSettings</div>
+      <div style="color: #666;">→ has many Documents</div>
+      <div style="color: #666;">→ has many CustomThemes</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 12px; border-radius: 6px; border-left: 3px solid #4a9eff;">
+      <div style="color: #4a9eff; font-weight: bold;">Document</div>
+      <div style="color: #888;">id, title, content (Text)</div>
+      <div style="color: #888;">version, checksum</div>
+      <div style="color: #888;">wordCount, charCount</div>
+      <div style="color: #666; margin-top: 4px;">→ has many Snapshots</div>
+      <div style="color: #666;">→ tracked by SyncQueue</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 12px; border-radius: 6px; border-left: 3px solid #f5a623;">
+      <div style="color: #f5a623; font-weight: bold;">UserSettings</div>
+      <div style="color: #888;">themeId, fontId, fontSizeOffset</div>
+      <div style="color: #888;">lineHeight, letterSpacing</div>
+      <div style="color: #888;">highlightConfig (JSON)</div>
+      <div style="color: #888;">focusMode, soloMode</div>
+      <div style="color: #888;">themeOverrides (JSON)</div>
+      <div style="color: #666; margin-top: 4px;">1 row per user</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 12px; border-radius: 6px; border-left: 3px solid #50fa7b;">
+      <div style="color: #50fa7b; font-weight: bold;">CustomTheme</div>
+      <div style="color: #888;">name, all color fields</div>
+      <div style="color: #888;">highlightColors (JSON)</div>
+      <div style="color: #888;">rhymeColors (JSON)</div>
+      <div style="color: #666; margin-top: 4px;">max 20 per user</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 12px; border-radius: 6px; border-left: 3px solid #bd93f9;">
+      <div style="color: #bd93f9; font-weight: bold;">ThemeConfig</div>
+      <div style="color: #888;">hiddenThemeIds (JSON)</div>
+      <div style="color: #888;">themeOrder (JSON)</div>
+      <div style="color: #888;">hasCustomizedVisibility</div>
+      <div style="color: #666; margin-top: 4px;">1 row per user</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 12px; border-radius: 6px; border-left: 3px solid #ff79c6;">
+      <div style="color: #ff79c6; font-weight: bold;">DocumentSnapshot</div>
+      <div style="color: #888;">content, version, checksum</div>
+      <div style="color: #888;">wordCount, createdAt</div>
+      <div style="color: #666; margin-top: 4px;">max 50 per document</div>
+      <div style="color: #666;">auto-pruned oldest</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3-Phase Rollout → v1.0.0</h3>
+  <div style="font-family: monospace; font-size: 12px;">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+      <!-- Phase 1 -->
+      <div style="background: #1a1a2e; padding: 16px; border-radius: 8px; border-top: 3px solid #50fa7b;">
+        <div style="color: #50fa7b; font-weight: bold; font-size: 14px;">Phase 1: Foundation</div>
+        <div style="color: #888; margin-bottom: 12px;">v0.1.0 → v0.4.0</div>
+        <div style="color: #ccc; line-height: 1.8;">
+          <div>v0.1.0 — Scaffold + Prisma + Railway</div>
+          <div>v0.2.0 — dbAuth (signup/login)</div>
+          <div>v0.3.0 — Typewriter + 13 themes + fonts</div>
+          <div>v0.4.0 — Document CRUD + auto-save + export</div>
+        </div>
+        <div style="color: #666; margin-top: 8px; font-size: 10px;">Demoable: Full writing experience with persistence</div>
+      </div>
+      <!-- Phase 2 -->
+      <div style="background: #1a1a2e; padding: 16px; border-radius: 8px; border-top: 3px solid #f5a623;">
+        <div style="color: #f5a623; font-weight: bold; font-size: 14px;">Phase 2: Intelligence</div>
+        <div style="color: #888; margin-bottom: 12px;">v0.5.0 → v0.7.0</div>
+        <div style="color: #ccc; line-height: 1.8;">
+          <div>v0.5.0 — NLP Web Worker + 12 syntax types</div>
+          <div>v0.6.0 — Focus mode + strikethrough + preview</div>
+          <div>v0.7.0 — Song mode + phoneme + custom themes</div>
+        </div>
+        <div style="color: #666; margin-top: 8px; font-size: 10px;">Demoable: Full NLP suite with rhyme/phoneme analysis</div>
+      </div>
+      <!-- Phase 3 -->
+      <div style="background: #1a1a2e; padding: 16px; border-radius: 8px; border-top: 3px solid #e94560;">
+        <div style="color: #e94560; font-weight: bold; font-size: 14px;">Phase 3: Ship</div>
+        <div style="color: #888; margin-bottom: 12px;">v0.8.0 → v1.0.0</div>
+        <div style="color: #ccc; line-height: 1.8;">
+          <div>v0.8.0 — PWA + offline sync engine</div>
+          <div>v0.9.0 — Mobile gestures + drag-and-drop</div>
+          <div>v1.0.0 — Polish + E2E tests + ship 🚀</div>
+        </div>
+        <div style="color: #666; margin-top: 8px; font-size: 10px;">Demoable: Production-ready, installable, offline-first</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>5x Parallel Agent Strategy</h3>
+  <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; font-family: monospace; font-size: 10px;">
+    <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; border-top: 2px solid #e94560; text-align: center;">
+      <div style="color: #e94560; font-weight: bold;">Agent 1</div>
+      <div style="color: #ccc;">PRESENTATION</div>
+      <div style="color: #888; margin-top: 4px;">Pages, Cells</div>
+      <div style="color: #888;">Components</div>
+      <div style="color: #888;">CSS, Animations</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; border-top: 2px solid #f5a623; text-align: center;">
+      <div style="color: #f5a623; font-weight: bold;">Agent 2</div>
+      <div style="color: #ccc;">STATE</div>
+      <div style="color: #888; margin-top: 4px;">React Hooks</div>
+      <div style="color: #888;">Context Providers</div>
+      <div style="color: #888;">Keyboard Shortcuts</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; border-top: 2px solid #bd93f9; text-align: center;">
+      <div style="color: #bd93f9; font-weight: bold;">Agent 3</div>
+      <div style="color: #ccc;">DATA</div>
+      <div style="color: #888; margin-top: 4px;">GraphQL SDL</div>
+      <div style="color: #888;">Services</div>
+      <div style="color: #888;">Resolvers</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; border-top: 2px solid #50fa7b; text-align: center;">
+      <div style="color: #50fa7b; font-weight: bold;">Agent 4</div>
+      <div style="color: #ccc;">STORAGE</div>
+      <div style="color: #888; margin-top: 4px;">Prisma Migrations</div>
+      <div style="color: #888;">localStorage</div>
+      <div style="color: #888;">Caching</div>
+    </div>
+    <div style="background: #1a1a2e; padding: 10px; border-radius: 6px; border-top: 2px solid #ff79c6; text-align: center;">
+      <div style="color: #ff79c6; font-weight: bold;">Agent 5</div>
+      <div style="color: #ccc;">SYNC</div>
+      <div style="color: #888; margin-top: 4px;">Auth Flow</div>
+      <div style="color: #888;">Offline Sync</div>
+      <div style="color: #888;">Deploy & Tests</div>
+    </div>
+  </div>
+  <div style="text-align: center; color: #888; font-size: 11px; margin-top: 8px;">
+    Agents 3+4 start first (define types) → Agent 5 (infra) → Agent 2 (hooks) → Agent 1 (UI)
+  </div>
+</div>
