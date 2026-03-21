@@ -23,6 +23,7 @@ import { useQuery, useMutation } from '@redwoodjs/web'
 
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useAutoSave } from 'src/hooks/useAutoSave'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { countWords } from 'src/lib/wordCount'
 import type { HighlightConfig, RisoTheme, SyntaxSets } from 'src/types/editor'
 
@@ -100,7 +101,7 @@ interface ChaptersEditorProps {
   /** Full RISO theme object */
   theme: RisoTheme
   /** Syntax classification sets from useSyntaxWorker */
-  syntaxSets: SyntaxSets | null
+  syntaxSets: SyntaxSets
   /** Per-category toggle for syntax highlighting */
   highlightConfig: HighlightConfig
   /** CSS font-family string */
@@ -134,14 +135,22 @@ const ChaptersEditor = ({
   // State
   // -----------------------------------------------------------------------
 
+  const { isMobile } = useResponsiveBreakpoint()
+
   /** ID of the currently active chapter being edited */
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null)
 
   /** Local content state for the active chapter (drives the Typewriter) */
   const [chapterContent, setChapterContent] = useState('')
 
-  /** Sidebar collapse state (for mobile/narrow viewports) */
+  /** Sidebar collapse state (for desktop narrow viewports) */
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  /**
+   * Mobile overlay: whether the sidebar is visible as a full-width overlay.
+   * Only relevant when isMobile is true.
+   */
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   /** Outline panel visibility */
   const [outlineVisible, setOutlineVisible] = useState(false)
@@ -474,25 +483,68 @@ const ChaptersEditor = ({
         display: 'flex',
         height: '100%',
         backgroundColor: theme.background,
+        position: 'relative',
       }}
     >
-      {/* Left: Chapter Sidebar */}
-      <ChapterSidebar
-        chapters={chaptersWithLiveCount}
-        activeChapterId={activeChapterId}
-        theme={theme}
-        onSelectChapter={handleSelectChapter}
-        onAddChapter={handleAddChapter}
-        onRenameChapter={handleRenameChapter}
-        onDeleteChapter={handleDeleteChapter}
-        onMoveUp={handleMoveUp}
-        onMoveDown={handleMoveDown}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
+      {/* ------------------------------------------------------------------ */}
+      {/* Desktop: inline sidebar. Mobile: hidden (rendered as overlay below) */}
+      {/* ------------------------------------------------------------------ */}
+      {!isMobile && (
+        <ChapterSidebar
+          chapters={chaptersWithLiveCount}
+          activeChapterId={activeChapterId}
+          theme={theme}
+          onSelectChapter={handleSelectChapter}
+          onAddChapter={handleAddChapter}
+          onRenameChapter={handleRenameChapter}
+          onDeleteChapter={handleDeleteChapter}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+      )}
 
       {/* Right: Typewriter Editor with Outline overlay */}
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        {/* Mobile: hamburger toggle button */}
+        {isMobile && (
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            title="Show chapters"
+            style={{
+              position: 'absolute',
+              top: '10px',
+              left: '10px',
+              zIndex: 10,
+              background: theme.background,
+              border: `1px solid ${theme.text}30`,
+              borderRadius: '6px',
+              color: theme.text,
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              padding: 0,
+            }}
+          >
+            {/* List/hamburger icon */}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect x="2" y="4" width="12" height="1.5" rx="0.75" fill="currentColor" />
+              <rect x="2" y="7.25" width="12" height="1.5" rx="0.75" fill="currentColor" />
+              <rect x="2" y="10.5" width="12" height="1.5" rx="0.75" fill="currentColor" />
+            </svg>
+          </button>
+        )}
+
         {/* Chapter Outline (floating panel) */}
         <ChapterOutline
           visible={outlineVisible}
@@ -537,6 +589,91 @@ const ChaptersEditor = ({
           </div>
         )}
       </div>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Mobile sidebar overlay                                              */}
+      {/* ------------------------------------------------------------------ */}
+      {isMobile && mobileSidebarOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setMobileSidebarOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 40,
+              backgroundColor: 'rgba(0,0,0,0.45)',
+            }}
+          />
+
+          {/* Sidebar panel -- slides in from the left */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: '100%',
+              zIndex: 50,
+              backgroundColor: theme.background,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Close button row */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                padding: '10px 12px 0',
+              }}
+            >
+              <button
+                onClick={() => setMobileSidebarOpen(false)}
+                title="Close chapters"
+                style={{
+                  background: 'transparent',
+                  border: `1px solid ${theme.text}30`,
+                  borderRadius: '6px',
+                  color: theme.text,
+                  width: '34px',
+                  height: '34px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontSize: '18px',
+                  lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Full-width chapter sidebar */}
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <ChapterSidebar
+                chapters={chaptersWithLiveCount}
+                activeChapterId={activeChapterId}
+                theme={theme}
+                onSelectChapter={(id) => {
+                  handleSelectChapter(id)
+                  setMobileSidebarOpen(false)
+                }}
+                onAddChapter={handleAddChapter}
+                onRenameChapter={handleRenameChapter}
+                onDeleteChapter={handleDeleteChapter}
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
+                collapsed={false}
+                onToggleCollapse={() => {}}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

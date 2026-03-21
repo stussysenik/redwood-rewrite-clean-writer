@@ -37,6 +37,7 @@ import { useQuery, useMutation } from '@redwoodjs/web'
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useTheme } from 'src/context/ThemeContext'
 import { useAutoSave } from 'src/hooks/useAutoSave'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
 import { countWords } from 'src/lib/wordCount'
 import type { HighlightConfig } from 'src/types/editor'
@@ -143,6 +144,12 @@ const RomanEditor = ({
   paragraphSpacing,
 }: RomanEditorProps) => {
   const { theme } = useTheme()
+  const { isMobile } = useResponsiveBreakpoint()
+
+  /** Mobile overlay state for left nav */
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  /** Mobile overlay state for right panel (goals + notes) */
+  const [mobileRightOpen, setMobileRightOpen] = useState(false)
 
   // Manuscript formatting toggle (Courier Prime, double-spaced, 12pt, 650px)
   const [manuscriptMode, setManuscriptMode] = useState(() => {
@@ -398,28 +405,31 @@ const RomanEditor = ({
         display: 'flex',
         height: '100%',
         backgroundColor: theme.background,
+        position: 'relative',
       }}
     >
-      {/* ---- Left sidebar: ManuscriptNav ---- */}
-      <div
-        style={{
-          width: '220px',
-          minWidth: '220px',
-          borderRight: `1px solid ${theme.text}15`,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-      >
-        <ManuscriptNav
-          chapters={chapters}
-          activeChapterId={activeChapterId}
-          onSelectChapter={setActiveChapterId}
-          onAddChapter={handleAddChapter}
-          onAddPart={handleAddPart}
-          theme={theme}
-        />
-      </div>
+      {/* ---- Left sidebar: ManuscriptNav (desktop only inline) ---- */}
+      {!isMobile && (
+        <div
+          style={{
+            width: '220px',
+            minWidth: '220px',
+            borderRight: `1px solid ${theme.text}15`,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          <ManuscriptNav
+            chapters={chapters}
+            activeChapterId={activeChapterId}
+            onSelectChapter={setActiveChapterId}
+            onAddChapter={handleAddChapter}
+            onAddPart={handleAddPart}
+            theme={theme}
+          />
+        </div>
+      )}
 
       {/* ---- Center: Typewriter editor ---- */}
       <div
@@ -443,7 +453,41 @@ const RomanEditor = ({
             opacity: 0.6,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Left side: mobile nav toggle + chapter title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {isMobile && (
+              <button
+                onClick={() => setMobileNavOpen(true)}
+                title="Show manuscript navigation"
+                style={{
+                  background: 'transparent',
+                  border: `1px solid ${theme.text}30`,
+                  borderRadius: '5px',
+                  color: theme.text,
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                  flexShrink: 0,
+                }}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect x="2" y="4" width="12" height="1.5" rx="0.75" fill="currentColor" />
+                  <rect x="2" y="7.25" width="12" height="1.5" rx="0.75" fill="currentColor" />
+                  <rect x="2" y="10.5" width="12" height="1.5" rx="0.75" fill="currentColor" />
+                </svg>
+              </button>
+            )}
+
             <span style={{ fontWeight: 600 }}>
               {activeChapter ? activeChapter.title : 'Select a chapter'}
             </span>
@@ -454,7 +498,8 @@ const RomanEditor = ({
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Right side: toolbar buttons + mobile right panel toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {/* Manuscript format toggle */}
             <button
               onClick={toggleManuscript}
@@ -491,6 +536,41 @@ const RomanEditor = ({
             >
               Export .md
             </button>
+
+            {/* Mobile right panel toggle */}
+            {isMobile && (
+              <button
+                onClick={() => setMobileRightOpen(true)}
+                title="Show goals and notes"
+                style={{
+                  background: 'transparent',
+                  border: `1px solid ${theme.text}30`,
+                  borderRadius: '5px',
+                  color: theme.text,
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                  flexShrink: 0,
+                }}
+              >
+                {/* Bar chart / goal icon */}
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect x="2" y="9" width="3" height="5" rx="0.75" fill="currentColor" />
+                  <rect x="6.5" y="5" width="3" height="9" rx="0.75" fill="currentColor" />
+                  <rect x="11" y="2" width="3" height="12" rx="0.75" fill="currentColor" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
@@ -530,23 +610,165 @@ const RomanEditor = ({
         </div>
       </div>
 
-      {/* ---- Right sidebar: Session + Goals + Notes ---- */}
-      <div
-        style={{
-          width: '180px',
-          minWidth: '180px',
-          borderLeft: `1px solid ${theme.text}15`,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-      >
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          <SessionTracker wordCount={adjustedTotal} theme={theme} />
-          <WordGoalTracker totalWords={adjustedTotal} theme={theme} />
-          <NoteCards documentId={documentId} theme={theme} />
+      {/* ---- Right sidebar: Session + Goals + Notes (desktop only inline) ---- */}
+      {!isMobile && (
+        <div
+          style={{
+            width: '180px',
+            minWidth: '180px',
+            borderLeft: `1px solid ${theme.text}15`,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            <SessionTracker wordCount={adjustedTotal} theme={theme} />
+            <WordGoalTracker totalWords={adjustedTotal} theme={theme} />
+            <NoteCards documentId={documentId} theme={theme} />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Mobile: left nav overlay                                            */}
+      {/* ------------------------------------------------------------------ */}
+      {isMobile && mobileNavOpen && (
+        <>
+          <div
+            onClick={() => setMobileNavOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 40,
+              backgroundColor: 'rgba(0,0,0,0.45)',
+            }}
+          />
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: '100%',
+              zIndex: 50,
+              backgroundColor: theme.background,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                padding: '10px 12px 0',
+              }}
+            >
+              <button
+                onClick={() => setMobileNavOpen(false)}
+                title="Close navigation"
+                style={{
+                  background: 'transparent',
+                  border: `1px solid ${theme.text}30`,
+                  borderRadius: '6px',
+                  color: theme.text,
+                  width: '34px',
+                  height: '34px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontSize: '18px',
+                  lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <ManuscriptNav
+                chapters={chapters}
+                activeChapterId={activeChapterId}
+                onSelectChapter={(id) => {
+                  setActiveChapterId(id)
+                  setMobileNavOpen(false)
+                }}
+                onAddChapter={handleAddChapter}
+                onAddPart={handleAddPart}
+                theme={theme}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Mobile: right panel overlay (goals + notes)                         */}
+      {/* ------------------------------------------------------------------ */}
+      {isMobile && mobileRightOpen && (
+        <>
+          <div
+            onClick={() => setMobileRightOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 40,
+              backgroundColor: 'rgba(0,0,0,0.45)',
+            }}
+          />
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: '100%',
+              zIndex: 50,
+              backgroundColor: theme.background,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                padding: '10px 12px 0',
+              }}
+            >
+              <button
+                onClick={() => setMobileRightOpen(false)}
+                title="Close goals and notes"
+                style={{
+                  background: 'transparent',
+                  border: `1px solid ${theme.text}30`,
+                  borderRadius: '6px',
+                  color: theme.text,
+                  width: '34px',
+                  height: '34px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontSize: '18px',
+                  lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <SessionTracker wordCount={adjustedTotal} theme={theme} />
+              <WordGoalTracker totalWords={adjustedTotal} theme={theme} />
+              <NoteCards documentId={documentId} theme={theme} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
