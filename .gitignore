@@ -15,6 +15,7 @@ web/public/mockServiceWorker.js
 web/types/graphql.d.ts
 api/types/graphql.d.ts
 api/src/lib/generateGraphiQLHeader.*
+web/storybook-static
 .pnp.*
 .yarn/*
 !.yarn/patches
