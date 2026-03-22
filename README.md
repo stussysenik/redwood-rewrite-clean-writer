@@ -15,6 +15,7 @@
   <a href="https://www.postgresql.org"><img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
   <a href="https://web.dev/progressive-web-apps"><img src="https://img.shields.io/badge/PWA-ready-5A0FC8?style=flat-square&logo=pwa" alt="PWA" /></a>
   <a href="https://railway.app"><img src="https://img.shields.io/badge/deploy-Railway-0B0D0E?style=flat-square&logo=railway" alt="Railway" /></a>
+  <a href="https://storybook.js.org"><img src="https://img.shields.io/badge/Storybook-8.6-FF4785?style=flat-square&logo=storybook&logoColor=white" alt="Storybook" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/stussysenik/redwood-rewrite-clean-writer?style=flat-square" alt="License" /></a>
 </p>
 
@@ -135,6 +136,123 @@ railway up
 
 The deploy command runs `prisma migrate deploy` before starting the server.
 
+## Storybook
+
+Clean Writer includes a full [Storybook](https://storybook.js.org) component library — **28 components** with **131 visual variants** covering the entire design system.
+
+### Quick Start
+
+```bash
+cd web
+yarn storybook
+```
+
+Opens at [localhost:6006](http://localhost:6006). Every story renders in isolation with live prop editing, accessibility auditing, and a toolbar theme switcher across all 15 built-in themes.
+
+### Component Coverage
+
+| Category | Components | Stories |
+|----------|-----------|---------|
+| **Design System** | Kbd | 5 |
+| **Feedback** | Toast, ConfirmDialog | 9 |
+| **Controls** | FontSelector, ModeSelector | 5 |
+| **Content** | MarkdownPreview | 4 |
+| **Overlays** | HelpModal | 3 |
+| **Typewriter** | TypewriterCursor, SyntaxBackdrop, Typewriter | 12 |
+| **Roman Mode** | SessionTracker, WordGoalTracker, ManuscriptNav, NoteCards | 13 |
+| **Journal Mode** | JournalEntryHeader, MoodTagPicker, JournalCalendar | 14 |
+| **Chapters Mode** | ChapterOutline, ChapterSidebar | 10 |
+| **Syntax Analysis** | SyntaxPanel, PanelBody, SongPanel, PhonemePanel | 17 |
+| **Theme & Settings** | SaveThemeForm, SettingsPanel, ThemeSelector | 6 |
+| **Toolbar** | ActionButtons, WordCount | 9 |
+
+> [!TIP]
+> Use the **paintbrush icon** in the Storybook toolbar to switch between all 15 themes. Every component re-renders instantly with the selected theme's colors.
+
+### How to Use
+
+- **Controls panel** (bottom tab) — Edit props live. Toggle types, change text, switch themes.
+- **Docs tab** — Auto-generated documentation from TypeScript prop interfaces. Every component with `tags: ['autodocs']` gets a full prop table.
+- **Actions tab** — See callback events fire in real-time (clicks, changes, submissions).
+- **Accessibility tab** — Each component is audited for WCAG violations via the `@storybook/addon-a11y` addon.
+- **Backgrounds** — Switch between 9 preset backgrounds matching the light/dark theme palettes.
+
+### Writing New Stories
+
+Stories live alongside their components. Create `ComponentName.stories.tsx` next to the component:
+
+```tsx
+import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from '@storybook/test'
+import MyComponent from './MyComponent'
+import { classicTheme } from '../../../.storybook/fixtures/themes'
+
+const meta: Meta<typeof MyComponent> = {
+  title: 'Category/MyComponent',
+  component: MyComponent,
+  tags: ['autodocs'],
+  args: {
+    theme: classicTheme,
+    onAction: fn(),
+  },
+}
+export default meta
+type Story = StoryObj<typeof MyComponent>
+
+export const Default: Story = {}
+export const DarkTheme: Story = {
+  args: { theme: midnightTheme },
+}
+```
+
+### Architecture
+
+```
+web/.storybook/
+  main.ts              # Vite config — src/ alias, PostCSS, RedwoodJS plugin filtering
+  preview.ts           # Global CSS, theme decorator, background presets
+  decorators/
+    withTheme.tsx      # Wraps stories in ThemeProvider + toolbar theme switcher
+    withWriter.tsx     # Mock WriterProvider (no GraphQL) for Toolbar components
+    withWritingMode.tsx # Real WritingModeProvider for ModeSelector
+  fixtures/
+    themes.ts          # Pre-resolved theme objects (classicTheme, midnightTheme, etc.)
+    syntax.ts          # Sample SyntaxSets, HighlightConfig, SongAnalysis data
+  mocks/
+    redwood.ts         # Global gql tagged template mock
+    writerContext.tsx   # Mock WriterContext backed by React useState
+```
+
+**Key design decisions:**
+
+- **Real ThemeProvider** — The `withTheme` decorator uses the actual `ThemeProvider` (which has a `defaultThemeId` prop designed for Storybook). CSS variables sync automatically.
+- **Mock WriterContext** — The real `WriterProvider` depends on `useMutation` from `@redwoodjs/web`. The mock replaces it via a Vite alias in `main.ts` so components import the mock transparently.
+- **RedwoodJS plugin filtering** — Storybook auto-discovers `web/vite.config.ts` which loads `@redwoodjs/vite`. The `viteFinal` hook strips RedwoodJS, node-stdlib, and node-polyfills plugins that conflict with Storybook's own Vite instance.
+
+### Maintaining Storybook
+
+**When to add a story:**
+- Every new presentational component should get a `.stories.tsx` file
+- Cover key visual states: default, empty, error, loading, dark theme variant
+
+**Decorators for context-dependent components:**
+
+| Component uses... | Add this decorator |
+|-------------------|--------------------|
+| `useTheme()` | Already global — no action needed |
+| `useWritingMode()` | `decorators: [withWritingMode]` |
+| `useWriter()` | `decorators: [withWriter]` |
+| `useQuery` / `useMutation` | Skipped for now — needs MSW setup |
+
+**Building for deployment:**
+
+```bash
+cd web
+yarn build-storybook
+```
+
+Outputs a static site to `web/storybook-static/` that can be deployed to any static host.
+
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
@@ -161,6 +279,7 @@ The deploy command runs `prisma migrate deploy` before starting the server.
 | Auth | dbAuth (self-hosted, cookie-based) |
 | NLP | [compromise.js](https://compromise.cool), CMU dictionary |
 | Color Science | OKLCH perceptual color space |
+| Component Dev | [Storybook](https://storybook.js.org) 8.6 (28 components, 131 variants) |
 | Deploy | [Railway](https://railway.app) |
 
 ## Contributing
