@@ -138,6 +138,10 @@ export function useSyntaxWorker(text: string) {
 
     setIsAnalyzing(true)
 
+    // Longer debounce on mobile to reduce INP pressure
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
+    const delay = isMobile ? 250 : 150
+
     debounceRef.current = setTimeout(() => {
       const worker = workerRef.current
       if (!worker) return
@@ -145,7 +149,7 @@ export function useSyntaxWorker(text: string) {
       const id = ++idCounterRef.current
       latestSyntaxIdRef.current = id
       worker.postMessage({ type: 'syntax', text: content, id })
-    }, 150)
+    }, delay)
   }, [])
 
   // Trigger analysis when text changes

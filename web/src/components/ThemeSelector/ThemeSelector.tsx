@@ -13,7 +13,7 @@
  *
  * Uses @dnd-kit for accessible drag-and-drop reordering.
  */
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 
 import {
   DndContext,
@@ -153,7 +153,7 @@ interface ThemeDotProps {
   onDelete?: () => void
 }
 
-const SortableThemeDot = ({
+const SortableThemeDot = memo(({
   theme,
   isActive,
   ringColor,
@@ -253,7 +253,7 @@ const SortableThemeDot = ({
       )}
     </div>
   )
-}
+})
 
 // ---------------------------------------------------------------------------
 // ThemeSelector
