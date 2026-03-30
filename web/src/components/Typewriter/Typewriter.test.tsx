@@ -94,28 +94,37 @@ describe('Typewriter', () => {
   // Forward-only: backspace blocked
   // -------------------------------------------------------------------------
 
-  it('prevents backspace key', () => {
-    render(<Typewriter {...defaultProps} content="hello" />)
+  it('prevents backspace key (content unchanged after backspace)', () => {
+    const onContentChange = jest.fn()
+    render(<Typewriter {...defaultProps} content="hello" onContentChange={onContentChange} />)
 
     const textarea = document.querySelector('textarea') as HTMLTextAreaElement
-    const event = new KeyboardEvent('keydown', {
-      key: 'Backspace',
-      bubbles: true,
-      cancelable: true,
-    })
 
-    const prevented = !textarea.dispatchEvent(event)
-    // The event should have been handled (preventDefault called in React handler)
-    expect(textarea).toBeTruthy()
+    // fireEvent.keyDown returns false when preventDefault was called
+    const wasDefault = fireEvent.keyDown(textarea, { key: 'Backspace' })
+    expect(wasDefault).toBe(false)
+
+    // onContentChange should NOT have been called with shorter content
+    const shorterCalls = onContentChange.mock.calls.filter(
+      ([val]: [string]) => val.length < 'hello'.length
+    )
+    expect(shorterCalls).toHaveLength(0)
   })
 
   it('prevents delete key', () => {
-    render(<Typewriter {...defaultProps} content="hello" />)
+    const onContentChange = jest.fn()
+    render(<Typewriter {...defaultProps} content="hello" onContentChange={onContentChange} />)
 
     const textarea = document.querySelector('textarea') as HTMLTextAreaElement
-    const event = fireEvent.keyDown(textarea, { key: 'Delete' })
-    // fireEvent returns false when preventDefault was called
-    expect(textarea).toBeTruthy()
+
+    const wasDefault = fireEvent.keyDown(textarea, { key: 'Delete' })
+    expect(wasDefault).toBe(false)
+
+    // onContentChange should NOT have been called with shorter content
+    const shorterCalls = onContentChange.mock.calls.filter(
+      ([val]: [string]) => val.length < 'hello'.length
+    )
+    expect(shorterCalls).toHaveLength(0)
   })
 
   // -------------------------------------------------------------------------

@@ -3,7 +3,7 @@
  *
  * Layer stack (bottom to top):
  *   1. SyntaxBackdrop -- visible colored text + inline blinking cursor
- *   2. Hidden <textarea> -- captures keyboard input (opacity: 0, z-index: 10)
+ *   2. Hidden <textarea> -- captures keyboard input (transparent colors, z-index: 10)
  *
  * Both layers share IDENTICAL font metrics (fontFamily, fontSize, lineHeight,
  * letterSpacing, whiteSpace, wordBreak) so they align pixel-for-pixel.
