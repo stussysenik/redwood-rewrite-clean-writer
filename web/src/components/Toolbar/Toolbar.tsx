@@ -172,37 +172,33 @@ const Toolbar = ({
             </div>
           </div>
         ) : (
-          /* Mobile: two compact rows */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {/* Row 1: mode selector + key actions */}
+          /* Phone: stacked rows with full labels and horizontal scroll */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {/* Row 1: full mode selector + word count */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                gap: '8px',
               }}
             >
-              <ModeSelector compact />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <WordCount />
-                <ActionButtons
-                  onStrikethrough={onStrikethrough}
-                  focusModeActive={focusModeActive}
-                  onTogglePreview={onTogglePreview}
-                  isPreviewActive={isPreviewActive}
-                  onShowHelp={onShowHelp}
-                />
+              <div style={{ overflow: 'auto', flexShrink: 1, minWidth: 0 }}>
+                <ModeSelector />
               </div>
+              <WordCount />
             </div>
-            {/* Row 2: theme dots + settings */}
+            {/* Row 2: theme dots (horizontal scroll) + settings + font */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
+                gap: '4px',
               }}
             >
-              <ThemeSelector />
+              <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
+                <ThemeSelector />
+              </div>
               <button
                 onClick={onToggleSettings}
                 title="Typography settings"
@@ -215,6 +211,7 @@ const Toolbar = ({
                   padding: '12px',
                   display: 'flex',
                   alignItems: 'center',
+                  flexShrink: 0,
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -222,6 +219,28 @@ const Toolbar = ({
                   <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                 </svg>
               </button>
+              <FontSelector
+                fontId={fontId}
+                onFontChange={onFontChange}
+                textColor={theme.text}
+                backgroundColor={theme.background}
+              />
+            </div>
+            {/* Row 3: action buttons (scrollable) */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'auto',
+              }}
+            >
+              <ActionButtons
+                onStrikethrough={onStrikethrough}
+                focusModeActive={focusModeActive}
+                onTogglePreview={onTogglePreview}
+                isPreviewActive={isPreviewActive}
+                onShowHelp={onShowHelp}
+              />
             </div>
           </div>
         )}

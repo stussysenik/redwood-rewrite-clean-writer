@@ -22,8 +22,8 @@
   --sai-left: env(safe-area-inset-left, 0px);
   --sai-right: env(safe-area-inset-right, 0px);
 
-  /* Toolbar height for bottom padding calculations */
-  --toolbar-height: 88px;
+  /* Toolbar height for bottom padding calculations (3-row mobile toolbar) */
+  --toolbar-height: 140px;
 
   /* Theme colors (overridden by ThemeContext) */
   --bg-color: #FDFBF7;
@@ -59,18 +59,19 @@ a {
   touch-action: manipulation;
 }
 
-/* Range inputs: larger track + thumb for touch */
+/* Range inputs: larger track + thumb for mobile touch (32px visual, 44px tap area) */
 input[type="range"] {
-  min-height: 32px;
+  min-height: 44px;
   cursor: pointer;
+  touch-action: none;
 }
 input[type="range"]::-webkit-slider-thumb {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
 }
 input[type="range"]::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
 }
 
 /* Selection color */

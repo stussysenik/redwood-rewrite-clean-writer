@@ -446,11 +446,13 @@ const RomanEditor = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '6px 16px',
+            padding: '6px 12px',
             borderBottom: `1px solid ${theme.text}10`,
             fontSize: '11px',
             color: theme.text,
             opacity: 0.6,
+            gap: '8px',
+            flexWrap: 'wrap',
           }}
         >
           {/* Left side: mobile nav toggle + chapter title */}
@@ -491,8 +493,8 @@ const RomanEditor = ({
             <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {activeChapter ? activeChapter.title : 'Select a chapter'}
             </span>
-            {activeChapter && !isPhone && (
-              <span style={{ opacity: 0.5, fontSize: '10px' }}>
+            {activeChapter && (
+              <span style={{ opacity: 0.5, fontSize: '10px', flexShrink: 0 }}>
                 {localWordCount.toLocaleString()} words
               </span>
             )}
@@ -516,7 +518,7 @@ const RomanEditor = ({
                 opacity: manuscriptMode ? 1 : 0.5,
               }}
             >
-              {isPhone ? 'MS' : 'MS Format'}
+              MS Format
             </button>
 
             {/* Export button */}
@@ -534,7 +536,7 @@ const RomanEditor = ({
                 opacity: 0.5,
               }}
             >
-              {isPhone ? '.md' : 'Export .md'}
+              Export .md
             </button>
 
             {/* Mobile right panel toggle */}

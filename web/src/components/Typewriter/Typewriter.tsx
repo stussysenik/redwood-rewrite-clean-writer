@@ -340,7 +340,7 @@ const Typewriter = ({
         minHeight: '100%',
         cursor: 'text',
         padding: isPhone
-          ? '1rem 1rem calc(var(--toolbar-height) + env(safe-area-inset-bottom, 0px) + 16px)'
+          ? '1rem 1rem 160px'
           : '1rem 1rem 2rem',
       }}
     >

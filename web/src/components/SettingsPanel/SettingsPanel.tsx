@@ -15,6 +15,7 @@
 import { useCallback } from 'react'
 
 import { useTheme } from 'src/context/ThemeContext'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -89,13 +90,14 @@ const SliderRow = ({
         onChange={handleChange}
         style={{
           width: '100%',
-          height: '4px',
+          height: '8px',
           appearance: 'none',
           background: `${textColor}20`,
-          borderRadius: '2px',
+          borderRadius: '4px',
           outline: 'none',
           cursor: 'pointer',
           accentColor,
+          touchAction: 'none',
         }}
       />
     </div>
@@ -118,6 +120,7 @@ const SettingsPanel = ({
   onParagraphSpacingChange,
 }: SettingsPanelProps) => {
   const { theme } = useTheme()
+  const { isPhone } = useResponsiveBreakpoint()
 
   return (
     <div
@@ -146,7 +149,7 @@ const SettingsPanel = ({
       <div
         style={{
           position: 'relative',
-          padding: '28px 32px',
+          padding: isPhone ? '24px 20px' : '28px 32px',
           borderRadius: '12px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           maxWidth: '360px',

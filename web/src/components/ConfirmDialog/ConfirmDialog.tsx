@@ -10,6 +10,7 @@
  */
 import type { ReactNode } from 'react'
 
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import type { RisoTheme } from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
@@ -49,6 +50,8 @@ const ConfirmDialog = ({
   confirmLabel = 'CLEAR PAGE',
   cancelLabel = 'CANCEL',
 }: ConfirmDialogProps) => {
+  const { isPhone } = useResponsiveBreakpoint()
+
   if (!isOpen) return null
 
   const defaultMessage = (
@@ -88,7 +91,7 @@ const ConfirmDialog = ({
       <div
         style={{
           position: 'relative',
-          padding: '32px',
+          padding: isPhone ? '24px' : '32px',
           borderRadius: '8px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           maxWidth: '384px',
@@ -120,7 +123,12 @@ const ConfirmDialog = ({
           {message || defaultMessage}
         </p>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: isPhone ? 'column-reverse' : 'row',
+          justifyContent: isPhone ? 'stretch' : 'flex-end',
+          gap: isPhone ? '8px' : '16px',
+        }}>
           <button
             onClick={onCancel}
             style={{
@@ -130,8 +138,10 @@ const ConfirmDialog = ({
               opacity: 0.5,
               color: theme.text,
               background: 'none',
-              border: 'none',
+              border: `1px solid ${theme.text}20`,
+              borderRadius: '4px',
               cursor: 'pointer',
+              width: isPhone ? '100%' : 'auto',
             }}
           >
             {cancelLabel}
@@ -148,6 +158,7 @@ const ConfirmDialog = ({
               border: 'none',
               cursor: 'pointer',
               boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+              width: isPhone ? '100%' : 'auto',
             }}
           >
             {confirmLabel}

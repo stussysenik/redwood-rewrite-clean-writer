@@ -18,7 +18,13 @@ export function startINPMonitor() {
   try {
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        const e = entry as PerformanceEventTiming
+        // PerformanceEventTiming extends PerformanceEntry
+        const e = entry as PerformanceEntry & {
+          processingStart: number
+          processingEnd: number
+          interactionId?: number
+          target?: EventTarget | null
+        }
         if (e.duration > INP_THRESHOLD_MS) {
           console.warn(
             `[INP] Slow interaction: ${e.name} took ${Math.round(e.duration)}ms ` +
@@ -30,7 +36,8 @@ export function startINPMonitor() {
       }
     })
 
-    observer.observe({ type: 'event', buffered: true, durationThreshold: 16 })
+    // durationThreshold is valid for 'event' type but not in all TS lib definitions
+    observer.observe({ type: 'event', buffered: true, durationThreshold: 16 } as PerformanceObserverInit)
   } catch {
     // 'event' entry type not supported in this browser
   }
