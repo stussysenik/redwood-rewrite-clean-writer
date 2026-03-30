@@ -135,7 +135,7 @@ const ChaptersEditor = ({
   // State
   // -----------------------------------------------------------------------
 
-  const { isMobile } = useResponsiveBreakpoint()
+  const { isMobile, isPhone, isTablet } = useResponsiveBreakpoint()
 
   /** ID of the currently active chapter being edited */
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null)
@@ -521,8 +521,8 @@ const ChaptersEditor = ({
               border: `1px solid ${theme.text}30`,
               borderRadius: '6px',
               color: theme.text,
-              width: '34px',
-              height: '34px',
+              width: '44px',
+              height: '44px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -613,7 +613,7 @@ const ChaptersEditor = ({
               top: 0,
               left: 0,
               bottom: 0,
-              width: '100%',
+              width: isTablet ? '300px' : '100%',
               zIndex: 50,
               backgroundColor: theme.background,
               display: 'flex',
@@ -637,8 +637,8 @@ const ChaptersEditor = ({
                   border: `1px solid ${theme.text}30`,
                   borderRadius: '6px',
                   color: theme.text,
-                  width: '34px',
-                  height: '34px',
+                  width: '44px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

@@ -11,6 +11,7 @@
  */
 import { useMemo } from 'react'
 
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import type { RisoTheme } from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
@@ -47,8 +48,15 @@ interface JournalEntryHeaderProps {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Format a Date as "Friday, March 21, 2026" */
-function formatDateFull(date: Date): string {
+/** Format a Date as "Friday, March 21, 2026" (desktop) or "Fri, Mar 21" (phone) */
+function formatDateFull(date: Date, compact = false): string {
+  if (compact) {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    })
+  }
   return date.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -90,6 +98,7 @@ const JournalEntryHeader = ({
   theme,
 }: JournalEntryHeaderProps) => {
   const today = useMemo(() => new Date(), [])
+  const { isPhone } = useResponsiveBreakpoint()
   const isToday = isSameDay(selectedDate, today)
   const prevDate = addDays(selectedDate, -1)
   const nextDate = addDays(selectedDate, 1)
@@ -127,18 +136,19 @@ const JournalEntryHeader = ({
           style={buttonStyle}
           aria-label={`Go to ${formatDateShort(prevDate)}`}
         >
-          {'\u2190'} {formatDateShort(prevDate)}
+          {'\u2190'}{!isPhone && ` ${formatDateShort(prevDate)}`}
         </button>
 
         <span
           style={{
-            fontSize: '15px',
+            fontSize: isPhone ? '13px' : '15px',
             fontWeight: 600,
             color: theme.text,
             letterSpacing: '0.01em',
+            textAlign: 'center',
           }}
         >
-          {formatDateFull(selectedDate)}
+          {formatDateFull(selectedDate, isPhone)}
         </span>
 
         <button
@@ -146,7 +156,7 @@ const JournalEntryHeader = ({
           style={buttonStyle}
           aria-label={`Go to ${formatDateShort(nextDate)}`}
         >
-          {formatDateShort(nextDate)} {'\u2192'}
+          {!isPhone && `${formatDateShort(nextDate)} `}{'\u2192'}
         </button>
       </div>
 

@@ -144,7 +144,7 @@ const RomanEditor = ({
   paragraphSpacing,
 }: RomanEditorProps) => {
   const { theme } = useTheme()
-  const { isMobile } = useResponsiveBreakpoint()
+  const { isMobile, isPhone, isTablet } = useResponsiveBreakpoint()
 
   /** Mobile overlay state for left nav */
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -464,8 +464,8 @@ const RomanEditor = ({
                   border: `1px solid ${theme.text}30`,
                   borderRadius: '5px',
                   color: theme.text,
-                  width: '28px',
-                  height: '28px',
+                  width: '44px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -488,10 +488,10 @@ const RomanEditor = ({
               </button>
             )}
 
-            <span style={{ fontWeight: 600 }}>
+            <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {activeChapter ? activeChapter.title : 'Select a chapter'}
             </span>
-            {activeChapter && (
+            {activeChapter && !isPhone && (
               <span style={{ opacity: 0.5, fontSize: '10px' }}>
                 {localWordCount.toLocaleString()} words
               </span>
@@ -511,12 +511,12 @@ const RomanEditor = ({
                 color: manuscriptMode ? theme.accent : theme.text,
                 fontSize: '10px',
                 fontWeight: manuscriptMode ? 600 : 400,
-                padding: '2px 8px',
+                padding: '8px 12px',
                 cursor: 'pointer',
                 opacity: manuscriptMode ? 1 : 0.5,
               }}
             >
-              MS Format
+              {isPhone ? 'MS' : 'MS Format'}
             </button>
 
             {/* Export button */}
@@ -529,12 +529,12 @@ const RomanEditor = ({
                 borderRadius: '4px',
                 color: theme.text,
                 fontSize: '10px',
-                padding: '2px 8px',
+                padding: '8px 12px',
                 cursor: 'pointer',
                 opacity: 0.5,
               }}
             >
-              Export .md
+              {isPhone ? '.md' : 'Export .md'}
             </button>
 
             {/* Mobile right panel toggle */}
@@ -547,8 +547,8 @@ const RomanEditor = ({
                   border: `1px solid ${theme.text}30`,
                   borderRadius: '5px',
                   color: theme.text,
-                  width: '28px',
-                  height: '28px',
+                  width: '44px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -650,7 +650,7 @@ const RomanEditor = ({
               top: 0,
               left: 0,
               bottom: 0,
-              width: '100%',
+              width: isTablet ? '300px' : '100%',
               zIndex: 50,
               backgroundColor: theme.background,
               display: 'flex',
@@ -673,8 +673,8 @@ const RomanEditor = ({
                   border: `1px solid ${theme.text}30`,
                   borderRadius: '6px',
                   color: theme.text,
-                  width: '34px',
-                  height: '34px',
+                  width: '44px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -724,7 +724,7 @@ const RomanEditor = ({
               top: 0,
               right: 0,
               bottom: 0,
-              width: '100%',
+              width: isTablet ? '300px' : '100%',
               zIndex: 50,
               backgroundColor: theme.background,
               display: 'flex',
@@ -747,8 +747,8 @@ const RomanEditor = ({
                   border: `1px solid ${theme.text}30`,
                   borderRadius: '6px',
                   color: theme.text,
-                  width: '34px',
-                  height: '34px',
+                  width: '44px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
