@@ -21,9 +21,9 @@ import { useQuery, useMutation } from '@redwoodjs/web'
 
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useAutoSave } from 'src/hooks/useAutoSave'
+import { useMobileKeyboard } from 'src/hooks/useMobileKeyboard'
 import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
-import { useVisualViewport } from 'src/hooks/useVisualViewport'
 import { countWords } from 'src/lib/wordCount'
 import type { HighlightConfig, RisoTheme, SyntaxSets } from 'src/types/editor'
 
@@ -143,9 +143,8 @@ const JournalEditor = ({
   const [tags, setTagsRaw] = useState<string[]>([])
   const [entryId, setEntryId] = useState<string | null>(null)
   const { isMobile } = useResponsiveBreakpoint()
-  const { keyboardVisible } = useVisualViewport()
+  const hideChrome = useMobileKeyboard()
   const [calendarOpen, setCalendarOpen] = useState(() => !isMobile)
-  const hideChrome = keyboardVisible && isMobile
 
   // Refs for the auto-save closure to always see current values
   const contentRef = useRef(content)

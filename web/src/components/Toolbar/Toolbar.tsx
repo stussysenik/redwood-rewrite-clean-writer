@@ -12,8 +12,8 @@ import ThemeSelector from 'src/components/ThemeSelector/ThemeSelector'
 import ActionButtons from 'src/components/Toolbar/ActionButtons'
 import WordCount from 'src/components/Toolbar/WordCount'
 import { useTheme } from 'src/context/ThemeContext'
+import { useMobileKeyboard } from 'src/hooks/useMobileKeyboard'
 import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
-import { useVisualViewport } from 'src/hooks/useVisualViewport'
 import { BUILD_IDENTITY } from 'src/lib/themes'
 
 // ---------------------------------------------------------------------------
@@ -65,10 +65,10 @@ const Toolbar = ({
 }: ToolbarProps) => {
   const { theme } = useTheme()
   const { isDesktop } = useResponsiveBreakpoint()
-  const { keyboardVisible } = useVisualViewport()
+  const mobileKeyboardActive = useMobileKeyboard()
 
   // Hide toolbar when virtual keyboard is open on mobile (distraction-free typing)
-  if (keyboardVisible && !isDesktop) {
+  if (mobileKeyboardActive) {
     return settingsOpen ? (
       <SettingsPanel
         onClose={onToggleSettings}

@@ -4,7 +4,7 @@ import Toolbar from './Toolbar'
 
 // Mock hooks
 let mockIsDesktop = true
-let mockKeyboardVisible = false
+let mockMobileKeyboardActive = false
 
 jest.mock('src/hooks/useResponsiveBreakpoint', () => ({
   useResponsiveBreakpoint: () => ({
@@ -16,12 +16,8 @@ jest.mock('src/hooks/useResponsiveBreakpoint', () => ({
   }),
 }))
 
-jest.mock('src/hooks/useVisualViewport', () => ({
-  useVisualViewport: () => ({
-    keyboardVisible: mockKeyboardVisible,
-    keyboardHeight: mockKeyboardVisible ? 300 : 0,
-    viewportHeight: mockKeyboardVisible ? 544 : 844,
-  }),
+jest.mock('src/hooks/useMobileKeyboard', () => ({
+  useMobileKeyboard: () => mockMobileKeyboardActive,
 }))
 
 jest.mock('src/context/ThemeContext', () => ({
@@ -93,7 +89,7 @@ const defaultProps = {
 describe('Toolbar', () => {
   beforeEach(() => {
     mockIsDesktop = true
-    mockKeyboardVisible = false
+    mockMobileKeyboardActive = false
     defaultProps.onToggleSettings = jest.fn()
   })
 
@@ -127,7 +123,7 @@ describe('Toolbar', () => {
 
   it('hides toolbar when keyboard is visible on mobile', () => {
     mockIsDesktop = false
-    mockKeyboardVisible = true
+    mockMobileKeyboardActive = true
 
     const { container } = render(<Toolbar {...defaultProps} />)
 
@@ -137,7 +133,7 @@ describe('Toolbar', () => {
 
   it('shows settings panel even when keyboard is visible', () => {
     mockIsDesktop = false
-    mockKeyboardVisible = true
+    mockMobileKeyboardActive = true
 
     render(<Toolbar {...defaultProps} settingsOpen={true} />)
 
@@ -145,13 +141,13 @@ describe('Toolbar', () => {
     expect(screen.getByText('Typography')).toBeInTheDocument()
   })
 
-  it('does not hide toolbar on desktop when keyboard detected', () => {
+  it('does not hide toolbar on desktop (useMobileKeyboard returns false)', () => {
     mockIsDesktop = true
-    mockKeyboardVisible = true
+    mockMobileKeyboardActive = false // useMobileKeyboard returns false on desktop
 
     render(<Toolbar {...defaultProps} />)
 
-    // Desktop toolbar should still show
+    // Desktop toolbar should show
     expect(screen.getByText('Typewriter')).toBeInTheDocument()
   })
 
