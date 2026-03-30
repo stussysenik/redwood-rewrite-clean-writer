@@ -13,6 +13,7 @@ import ActionButtons from 'src/components/Toolbar/ActionButtons'
 import WordCount from 'src/components/Toolbar/WordCount'
 import { useTheme } from 'src/context/ThemeContext'
 import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
+import { useVisualViewport } from 'src/hooks/useVisualViewport'
 import { BUILD_IDENTITY } from 'src/lib/themes'
 
 // ---------------------------------------------------------------------------
@@ -63,7 +64,25 @@ const Toolbar = ({
   onShowHelp,
 }: ToolbarProps) => {
   const { theme } = useTheme()
-  const { isDesktop } = useResponsiveBreakpoint()
+  const { isDesktop, isPhone } = useResponsiveBreakpoint()
+  const { keyboardVisible } = useVisualViewport()
+
+  // Hide toolbar when virtual keyboard is open on mobile (distraction-free typing)
+  if (keyboardVisible && !isDesktop) {
+    return settingsOpen ? (
+      <SettingsPanel
+        onClose={onToggleSettings}
+        fontSizeOffset={fontSizeOffset}
+        onFontSizeOffsetChange={onFontSizeOffsetChange}
+        lineHeight={lineHeight}
+        onLineHeightChange={onLineHeightChange}
+        letterSpacing={letterSpacing}
+        onLetterSpacingChange={onLetterSpacingChange}
+        paragraphSpacing={paragraphSpacing}
+        onParagraphSpacingChange={onParagraphSpacingChange}
+      />
+    ) : null
+  }
 
   return (
     <>
@@ -76,10 +95,21 @@ const Toolbar = ({
           backgroundColor: theme.background,
           borderTop: `1px solid ${theme.text}20`,
           zIndex: 50,
-          padding: isDesktop ? '8px 16px' : '6px 10px',
+          padding: isDesktop
+            ? '8px 16px'
+            : '6px 10px',
+          paddingBottom: isDesktop
+            ? '8px'
+            : 'max(6px, env(safe-area-inset-bottom, 0px))',
+          paddingLeft: isDesktop
+            ? '16px'
+            : 'max(10px, env(safe-area-inset-left, 0px))',
+          paddingRight: isDesktop
+            ? '16px'
+            : 'max(10px, env(safe-area-inset-right, 0px))',
         }}
       >
-        {isDesktop ? (
+        {(isDesktop || !isPhone) ? (
           /* Desktop: single row */
           <div
             style={{

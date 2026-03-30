@@ -23,6 +23,7 @@ import { useRef, useCallback, useState, useMemo } from 'react'
 
 import SyntaxBackdrop from 'src/components/Typewriter/SyntaxBackdrop'
 import { useIMEComposition } from 'src/hooks/useIMEComposition'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import {
   isHashtagToken,
   isNumberToken,
@@ -178,6 +179,7 @@ const Typewriter = ({
 }: TypewriterProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
+  const { isPhone } = useResponsiveBreakpoint()
 
   // IME composition handling for CJK input
   const {
@@ -337,7 +339,9 @@ const Typewriter = ({
           letterSpacingProp !== 0 ? `${letterSpacingProp}px` : undefined,
         minHeight: '100%',
         cursor: 'text',
-        padding: '1rem 1rem 2rem',
+        padding: isPhone
+          ? '1rem 1rem calc(var(--toolbar-height) + env(safe-area-inset-bottom, 0px) + 16px)'
+          : '1rem 1rem 2rem',
       }}
     >
       {/* Max-width centered container with relative positioning for overlay */}

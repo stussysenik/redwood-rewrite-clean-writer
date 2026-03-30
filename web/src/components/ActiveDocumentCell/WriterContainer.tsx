@@ -374,14 +374,14 @@ const WriterContainer = () => {
   const showSyntaxPanel = isDesktop && viewMode === 'write' && syntaxPanelOpen
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
       {/* Focus mode indicator */}
       {focusModeActive && (
         <div
           style={{
             position: 'fixed',
             top: 8,
-            right: showSyntaxPanel ? PANEL_WIDTH + 32 : 16,
+            right: showSyntaxPanel ? PANEL_WIDTH + 32 : `max(16px, env(safe-area-inset-right, 0px))`,
             padding: '4px 12px',
             fontSize: '11px',
             fontFamily: '"Space Mono", monospace',
