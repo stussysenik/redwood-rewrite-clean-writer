@@ -137,7 +137,7 @@ const ChaptersEditor = ({
   // State
   // -----------------------------------------------------------------------
 
-  const { isMobile, isPhone, isTablet } = useResponsiveBreakpoint()
+  const { isMobile } = useResponsiveBreakpoint()
   const mobileKeyboardActive = useMobileKeyboard()
 
   /** ID of the currently active chapter being edited */

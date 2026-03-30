@@ -146,7 +146,7 @@ const RomanEditor = ({
   paragraphSpacing,
 }: RomanEditorProps) => {
   const { theme } = useTheme()
-  const { isMobile, isPhone, isTablet } = useResponsiveBreakpoint()
+  const { isMobile } = useResponsiveBreakpoint()
   const mobileKeyboardActive = useMobileKeyboard()
 
   /** Mobile overlay state for left nav */
