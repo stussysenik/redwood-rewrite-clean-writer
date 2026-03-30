@@ -2,7 +2,7 @@
  * Toolbar -- Fixed bottom bar for the writing interface.
  *
  * Mobile-first layout:
- * - Mobile (<1024px): Two rows. Top: mode selector + actions. Bottom: theme dots + settings.
+ * - Mobile (<1024px): Three rows. Mode+count, themes+settings+font, actions.
  * - Desktop (≥1024px): Single row with all elements.
  */
 import FontSelector from 'src/components/FontSelector/FontSelector'
@@ -41,6 +41,17 @@ interface ToolbarProps {
 }
 
 // ---------------------------------------------------------------------------
+// Shared settings gear icon
+// ---------------------------------------------------------------------------
+
+const GearIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+  </svg>
+)
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -67,21 +78,34 @@ const Toolbar = ({
   const { isDesktop } = useResponsiveBreakpoint()
   const mobileKeyboardActive = useMobileKeyboard()
 
-  // Hide toolbar when virtual keyboard is open on mobile (distraction-free typing)
+  const settingsGearStyle: React.CSSProperties = {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: theme.text,
+    opacity: settingsOpen ? 0.8 : 0.4,
+    padding: '12px',
+    display: 'flex',
+    alignItems: 'center',
+  }
+
+  const settingsPanel = settingsOpen && (
+    <SettingsPanel
+      onClose={onToggleSettings}
+      fontSizeOffset={fontSizeOffset}
+      onFontSizeOffsetChange={onFontSizeOffsetChange}
+      lineHeight={lineHeight}
+      onLineHeightChange={onLineHeightChange}
+      letterSpacing={letterSpacing}
+      onLetterSpacingChange={onLetterSpacingChange}
+      paragraphSpacing={paragraphSpacing}
+      onParagraphSpacingChange={onParagraphSpacingChange}
+    />
+  )
+
+  // Hide toolbar chrome when virtual keyboard is open on mobile
   if (mobileKeyboardActive) {
-    return settingsOpen ? (
-      <SettingsPanel
-        onClose={onToggleSettings}
-        fontSizeOffset={fontSizeOffset}
-        onFontSizeOffsetChange={onFontSizeOffsetChange}
-        lineHeight={lineHeight}
-        onLineHeightChange={onLineHeightChange}
-        letterSpacing={letterSpacing}
-        onLetterSpacingChange={onLetterSpacingChange}
-        paragraphSpacing={paragraphSpacing}
-        onParagraphSpacingChange={onParagraphSpacingChange}
-      />
-    ) : null
+    return <>{settingsPanel}</>
   }
 
   return (
@@ -144,24 +168,8 @@ const Toolbar = ({
               >
                 {BUILD_IDENTITY}
               </span>
-              <button
-                onClick={onToggleSettings}
-                title="Typography settings"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: theme.text,
-                  opacity: settingsOpen ? 0.8 : 0.4,
-                  padding: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                </svg>
+              <button onClick={onToggleSettings} title="Typography settings" style={settingsGearStyle}>
+                <GearIcon />
               </button>
               <FontSelector
                 fontId={fontId}
@@ -172,7 +180,7 @@ const Toolbar = ({
             </div>
           </div>
         ) : (
-          /* Phone: stacked rows with full labels and horizontal scroll */
+          /* Mobile: stacked rows with full labels and horizontal scroll */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {/* Row 1: full mode selector + word count */}
             <div
@@ -199,25 +207,8 @@ const Toolbar = ({
               <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
                 <ThemeSelector />
               </div>
-              <button
-                onClick={onToggleSettings}
-                title="Typography settings"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: theme.text,
-                  opacity: settingsOpen ? 0.8 : 0.4,
-                  padding: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                </svg>
+              <button onClick={onToggleSettings} title="Typography settings" style={{ ...settingsGearStyle, flexShrink: 0 }}>
+                <GearIcon />
               </button>
               <FontSelector
                 fontId={fontId}
@@ -246,20 +237,7 @@ const Toolbar = ({
         )}
       </div>
 
-      {/* Settings panel overlay */}
-      {settingsOpen && (
-        <SettingsPanel
-          onClose={onToggleSettings}
-          fontSizeOffset={fontSizeOffset}
-          onFontSizeOffsetChange={onFontSizeOffsetChange}
-          lineHeight={lineHeight}
-          onLineHeightChange={onLineHeightChange}
-          letterSpacing={letterSpacing}
-          onLetterSpacingChange={onLetterSpacingChange}
-          paragraphSpacing={paragraphSpacing}
-          onParagraphSpacingChange={onParagraphSpacingChange}
-        />
-      )}
+      {settingsPanel}
     </>
   )
 }
