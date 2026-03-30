@@ -16,6 +16,15 @@
   --touch-min: 44px;
   --spacing-unit: 15px;
 
+  /* Safe area insets (populated on devices with notch/Dynamic Island/home indicator) */
+  --sai-top: env(safe-area-inset-top, 0px);
+  --sai-bottom: env(safe-area-inset-bottom, 0px);
+  --sai-left: env(safe-area-inset-left, 0px);
+  --sai-right: env(safe-area-inset-right, 0px);
+
+  /* Toolbar height for bottom padding calculations */
+  --toolbar-height: 88px;
+
   /* Theme colors (overridden by ThemeContext) */
   --bg-color: #FDFBF7;
   --text-color: #333333;
@@ -29,16 +38,25 @@
  * WCAG 2.5.5 / Apple HIG: 44px minimum touch targets.
  * Applied globally as a safety net; inline styles in components
  * provide the actual sizing via padding increases.
+ *
+ * touch-action: manipulation prevents the 300ms tap delay and
+ * double-tap-to-zoom on all interactive elements.
  */
 button,
 [role="button"],
 select {
   min-height: var(--touch-min);
+  touch-action: manipulation;
 }
 
 input:not([type="hidden"]),
 textarea {
   min-height: var(--touch-min);
+  touch-action: manipulation;
+}
+
+a {
+  touch-action: manipulation;
 }
 
 /* Range inputs: larger track + thumb for touch */
