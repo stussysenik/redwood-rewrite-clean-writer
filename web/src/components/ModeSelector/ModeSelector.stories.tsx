@@ -13,10 +13,5 @@ const meta: Meta<typeof ModeSelector> = {
 export default meta
 type Story = StoryObj<typeof ModeSelector>
 
-/** Full-width labels: Typewriter, Journal, Chapters, Roman */
+/** Full labels: Typewriter, Journal, Chapters, Roman */
 export const Default: Story = {}
-
-/** Compact labels for mobile: Type, Jrnl, Chpt, Rmn */
-export const Compact: Story = {
-  args: { compact: true },
-}

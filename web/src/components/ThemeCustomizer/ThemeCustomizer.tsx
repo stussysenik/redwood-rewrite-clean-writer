@@ -25,6 +25,7 @@ import { useMutation } from '@redwoodjs/web'
 import SaveThemeForm from './SaveThemeForm'
 
 import { useTheme } from 'src/context/ThemeContext'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import {
   getContrastRatio,
   formatContrastRatio,
@@ -125,6 +126,7 @@ function normalizeHex(input: string): string {
 
 const ThemeCustomizer = ({ onClose, onThemeSaved }: ThemeCustomizerProps) => {
   const { theme } = useTheme()
+  const { isPhone } = useResponsiveBreakpoint()
 
   // Draft colors start from current theme
   const [draft, setDraft] = useState<DraftColors>({
@@ -267,12 +269,12 @@ const ThemeCustomizer = ({ onClose, onThemeSaved }: ThemeCustomizerProps) => {
       <div
         style={{
           position: 'relative',
-          padding: '28px 32px',
+          padding: isPhone ? '20px 16px' : '28px 32px',
           borderRadius: '12px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           maxWidth: '520px',
           width: '100%',
-          maxHeight: '85vh',
+          maxHeight: '85dvh',
           overflowY: 'auto',
           backgroundColor: theme.background,
           color: theme.text,
@@ -309,7 +311,7 @@ const ThemeCustomizer = ({ onClose, onThemeSaved }: ThemeCustomizerProps) => {
               cursor: 'pointer',
               color: theme.text,
               opacity: 0.4,
-              padding: '4px',
+              padding: '12px',
             }}
           >
             <svg
@@ -334,7 +336,7 @@ const ThemeCustomizer = ({ onClose, onThemeSaved }: ThemeCustomizerProps) => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: isPhone ? '1fr' : '1fr 1fr',
             gap: '12px',
             marginBottom: '24px',
           }}

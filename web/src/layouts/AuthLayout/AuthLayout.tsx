@@ -6,8 +6,8 @@
  */
 const AuthLayout = ({ children }: { children: React.ReactNode }) => (
   <div
-    className="min-h-screen flex items-center justify-center"
-    style={{ backgroundColor: '#FDFBF7', color: '#333333' }}
+    className="flex items-center justify-center"
+    style={{ minHeight: '100dvh', backgroundColor: '#FDFBF7', color: '#333333' }}
   >
     <div className="w-full max-w-md px-8">{children}</div>
   </div>

@@ -13,12 +13,13 @@
  *
  * Uses @dnd-kit for accessible drag-and-drop reordering.
  */
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 
 import {
   DndContext,
   closestCenter,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -34,6 +35,7 @@ import { useMutation, useQuery } from '@redwoodjs/web'
 
 import ThemeCustomizer from 'src/components/ThemeCustomizer/ThemeCustomizer'
 import { useTheme } from 'src/context/ThemeContext'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { THEMES } from 'src/lib/themes'
 import type { RisoTheme } from 'src/types/editor'
 
@@ -151,7 +153,7 @@ interface ThemeDotProps {
   onDelete?: () => void
 }
 
-const SortableThemeDot = ({
+const SortableThemeDot = memo(({
   theme,
   isActive,
   ringColor,
@@ -251,7 +253,7 @@ const SortableThemeDot = ({
       )}
     </div>
   )
-}
+})
 
 // ---------------------------------------------------------------------------
 // ThemeSelector
@@ -269,6 +271,7 @@ const ThemeSelector = () => {
   } = useTheme()
 
   const [customizerOpen, setCustomizerOpen] = useState(false)
+  const { isMobile } = useResponsiveBreakpoint()
 
   // Load custom themes from DB
   const { data, refetch } = useQuery(CUSTOM_THEMES_QUERY, {
@@ -300,10 +303,14 @@ const ThemeSelector = () => {
     [allThemes]
   )
 
-  // Sensors for drag (needs a minimum distance to distinguish from click)
+  // Sensors for drag — PointerSensor for desktop, TouchSensor for mobile
+  // TouchSensor uses delay to distinguish long-press-to-drag from scroll
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
     })
   )
 
@@ -377,7 +384,18 @@ const ThemeSelector = () => {
               display: 'flex',
               gap: '8px',
               alignItems: 'center',
-              flexWrap: 'wrap',
+              ...(isMobile
+                ? {
+                    flexWrap: 'nowrap',
+                    overflowX: 'auto',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none',
+                    maxWidth: '100%',
+                    gap: '2px',
+                  }
+                : {
+                    flexWrap: 'wrap',
+                  }),
             }}
             role="radiogroup"
             aria-label="Theme selector"

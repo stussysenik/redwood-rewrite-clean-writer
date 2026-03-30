@@ -394,7 +394,7 @@ const ChapterSidebar = ({
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1px',
+                      gap: '8px',
                     }}
                   >
                     <IconButton

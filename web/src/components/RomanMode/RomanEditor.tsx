@@ -34,9 +34,11 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 
 import { useQuery, useMutation } from '@redwoodjs/web'
 
+import MobileOverlayPanel from 'src/components/MobileOverlayPanel/MobileOverlayPanel'
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useTheme } from 'src/context/ThemeContext'
 import { useAutoSave } from 'src/hooks/useAutoSave'
+import { useMobileKeyboard } from 'src/hooks/useMobileKeyboard'
 import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
 import { countWords } from 'src/lib/wordCount'
@@ -145,6 +147,7 @@ const RomanEditor = ({
 }: RomanEditorProps) => {
   const { theme } = useTheme()
   const { isMobile } = useResponsiveBreakpoint()
+  const mobileKeyboardActive = useMobileKeyboard()
 
   /** Mobile overlay state for left nav */
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -440,19 +443,22 @@ const RomanEditor = ({
           overflow: 'hidden',
         }}
       >
-        {/* Manuscript mode toggle bar */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '6px 16px',
-            borderBottom: `1px solid ${theme.text}10`,
-            fontSize: '11px',
-            color: theme.text,
-            opacity: 0.6,
-          }}
-        >
+        {/* Manuscript mode toggle bar — hidden when keyboard is visible on mobile */}
+        {!mobileKeyboardActive && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '6px 12px',
+              borderBottom: `1px solid ${theme.text}10`,
+              fontSize: '11px',
+              color: theme.text,
+              opacity: 0.6,
+              gap: '8px',
+              flexWrap: 'wrap',
+            }}
+          >
           {/* Left side: mobile nav toggle + chapter title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {isMobile && (
@@ -464,8 +470,8 @@ const RomanEditor = ({
                   border: `1px solid ${theme.text}30`,
                   borderRadius: '5px',
                   color: theme.text,
-                  width: '28px',
-                  height: '28px',
+                  width: '44px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -488,11 +494,11 @@ const RomanEditor = ({
               </button>
             )}
 
-            <span style={{ fontWeight: 600 }}>
+            <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {activeChapter ? activeChapter.title : 'Select a chapter'}
             </span>
             {activeChapter && (
-              <span style={{ opacity: 0.5, fontSize: '10px' }}>
+              <span style={{ opacity: 0.5, fontSize: '10px', flexShrink: 0 }}>
                 {localWordCount.toLocaleString()} words
               </span>
             )}
@@ -511,7 +517,7 @@ const RomanEditor = ({
                 color: manuscriptMode ? theme.accent : theme.text,
                 fontSize: '10px',
                 fontWeight: manuscriptMode ? 600 : 400,
-                padding: '2px 8px',
+                padding: '8px 12px',
                 cursor: 'pointer',
                 opacity: manuscriptMode ? 1 : 0.5,
               }}
@@ -529,7 +535,7 @@ const RomanEditor = ({
                 borderRadius: '4px',
                 color: theme.text,
                 fontSize: '10px',
-                padding: '2px 8px',
+                padding: '8px 12px',
                 cursor: 'pointer',
                 opacity: 0.5,
               }}
@@ -547,8 +553,8 @@ const RomanEditor = ({
                   border: `1px solid ${theme.text}30`,
                   borderRadius: '5px',
                   color: theme.text,
-                  width: '28px',
-                  height: '28px',
+                  width: '44px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -573,6 +579,7 @@ const RomanEditor = ({
             )}
           </div>
         </div>
+        )}
 
         {/* Editor area */}
         <div style={{ flex: 1, overflow: 'auto' }}>
@@ -630,144 +637,43 @@ const RomanEditor = ({
         </div>
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Mobile: left nav overlay                                            */}
-      {/* ------------------------------------------------------------------ */}
-      {isMobile && mobileNavOpen && (
-        <>
-          <div
-            onClick={() => setMobileNavOpen(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 40,
-              backgroundColor: 'rgba(0,0,0,0.45)',
+      {/* Mobile: left nav overlay */}
+      {isMobile && (
+        <MobileOverlayPanel
+          open={mobileNavOpen}
+          onClose={() => setMobileNavOpen(false)}
+          closeTitle="Close navigation"
+          theme={theme}
+        >
+          <ManuscriptNav
+            chapters={chapters}
+            activeChapterId={activeChapterId}
+            onSelectChapter={(id) => {
+              setActiveChapterId(id)
+              setMobileNavOpen(false)
             }}
+            onAddChapter={handleAddChapter}
+            onAddPart={handleAddPart}
+            theme={theme}
           />
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              bottom: 0,
-              width: '100%',
-              zIndex: 50,
-              backgroundColor: theme.background,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                padding: '10px 12px 0',
-              }}
-            >
-              <button
-                onClick={() => setMobileNavOpen(false)}
-                title="Close navigation"
-                style={{
-                  background: 'transparent',
-                  border: `1px solid ${theme.text}30`,
-                  borderRadius: '6px',
-                  color: theme.text,
-                  width: '34px',
-                  height: '34px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  padding: 0,
-                  fontSize: '18px',
-                  lineHeight: 1,
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <ManuscriptNav
-                chapters={chapters}
-                activeChapterId={activeChapterId}
-                onSelectChapter={(id) => {
-                  setActiveChapterId(id)
-                  setMobileNavOpen(false)
-                }}
-                onAddChapter={handleAddChapter}
-                onAddPart={handleAddPart}
-                theme={theme}
-              />
-            </div>
-          </div>
-        </>
+        </MobileOverlayPanel>
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Mobile: right panel overlay (goals + notes)                         */}
-      {/* ------------------------------------------------------------------ */}
-      {isMobile && mobileRightOpen && (
-        <>
-          <div
-            onClick={() => setMobileRightOpen(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 40,
-              backgroundColor: 'rgba(0,0,0,0.45)',
-            }}
-          />
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: '100%',
-              zIndex: 50,
-              backgroundColor: theme.background,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                padding: '10px 12px 0',
-              }}
-            >
-              <button
-                onClick={() => setMobileRightOpen(false)}
-                title="Close goals and notes"
-                style={{
-                  background: 'transparent',
-                  border: `1px solid ${theme.text}30`,
-                  borderRadius: '6px',
-                  color: theme.text,
-                  width: '34px',
-                  height: '34px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  padding: 0,
-                  fontSize: '18px',
-                  lineHeight: 1,
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              <SessionTracker wordCount={adjustedTotal} theme={theme} />
-              <WordGoalTracker totalWords={adjustedTotal} theme={theme} />
-              <NoteCards documentId={documentId} theme={theme} />
-            </div>
+      {/* Mobile: right panel overlay (goals + notes) */}
+      {isMobile && (
+        <MobileOverlayPanel
+          open={mobileRightOpen}
+          onClose={() => setMobileRightOpen(false)}
+          closeTitle="Close goals and notes"
+          side="right"
+          theme={theme}
+        >
+          <div style={{ overflowY: 'auto', height: '100%' }}>
+            <SessionTracker wordCount={adjustedTotal} theme={theme} />
+            <WordGoalTracker totalWords={adjustedTotal} theme={theme} />
+            <NoteCards documentId={documentId} theme={theme} />
           </div>
-        </>
+        </MobileOverlayPanel>
       )}
     </div>
   )

@@ -1,55 +1,77 @@
 /**
- * useResponsiveBreakpoint -- Desktop/mobile detection hook.
+ * useResponsiveBreakpoint -- Phone/tablet/desktop detection hook.
  *
- * Uses `window.matchMedia` to detect whether the viewport width
- * is at or above the 1024px desktop breakpoint. This is more
- * performant than listening to every resize event because
- * matchMedia only fires when the breakpoint is actually crossed.
+ * Uses `window.matchMedia` to detect viewport width across two breakpoints:
+ *   - 768px: phone → tablet
+ *   - 1024px: tablet → desktop
+ *
+ * More performant than resize listeners because matchMedia only fires
+ * when a breakpoint is actually crossed.
  *
  * @example
  * ```tsx
- * const { isDesktop, isMobile } = useResponsiveBreakpoint()
- * return isDesktop ? <DesktopNav /> : <MobileNav />
+ * const { isPhone, isTablet, isDesktop, isMobile } = useResponsiveBreakpoint()
+ * // isMobile = isPhone || isTablet (backward compatible)
  * ```
  */
 import { useState, useEffect } from 'react'
 
-/** Viewport width at which we switch from mobile to desktop layout */
+const TABLET_BREAKPOINT = 768
 const DESKTOP_BREAKPOINT = 1024
 
-export type ScreenSize = 'mobile' | 'desktop'
+export type ScreenSize = 'phone' | 'tablet' | 'desktop'
 
 export function useResponsiveBreakpoint(): {
   screenSize: ScreenSize
+  isPhone: boolean
+  isTablet: boolean
   isDesktop: boolean
+  /** Backward-compatible: true when phone OR tablet */
   isMobile: boolean
 } {
-  const [isDesktop, setIsDesktop] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true
-    return window.innerWidth >= DESKTOP_BREAKPOINT
+  const [screenSize, setScreenSize] = useState<ScreenSize>(() => {
+    if (typeof window === 'undefined') return 'desktop'
+    const w = window.innerWidth
+    if (w >= DESKTOP_BREAKPOINT) return 'desktop'
+    if (w >= TABLET_BREAKPOINT) return 'tablet'
+    return 'phone'
   })
 
   useEffect(() => {
-    const mql = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`)
+    const tabletMql = window.matchMedia(`(min-width: ${TABLET_BREAKPOINT}px)`)
+    const desktopMql = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`)
 
-    /** Update state when the breakpoint is crossed */
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDesktop(e.matches)
+    const update = () => {
+      if (desktopMql.matches) {
+        setScreenSize('desktop')
+      } else if (tabletMql.matches) {
+        setScreenSize('tablet')
+      } else {
+        setScreenSize('phone')
+      }
     }
 
-    // Set initial value from the media query
-    setIsDesktop(mql.matches)
+    // Set initial value
+    update()
 
-    mql.addEventListener('change', handleChange)
-    return () => mql.removeEventListener('change', handleChange)
+    tabletMql.addEventListener('change', update)
+    desktopMql.addEventListener('change', update)
+    return () => {
+      tabletMql.removeEventListener('change', update)
+      desktopMql.removeEventListener('change', update)
+    }
   }, [])
 
-  const screenSize: ScreenSize = isDesktop ? 'desktop' : 'mobile'
+  const isDesktop = screenSize === 'desktop'
+  const isTablet = screenSize === 'tablet'
+  const isPhone = screenSize === 'phone'
 
   return {
     screenSize,
+    isPhone,
+    isTablet,
     isDesktop,
-    isMobile: !isDesktop,
+    isMobile: isPhone || isTablet,
   }
 }
 

@@ -10,6 +10,7 @@
  */
 import { useState, useCallback, type KeyboardEvent } from 'react'
 
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import type { RisoTheme } from 'src/types/editor'
 
 // ---------------------------------------------------------------------------
@@ -54,6 +55,7 @@ const MoodTagPicker = ({
   theme,
 }: MoodTagPickerProps) => {
   const [tagInput, setTagInput] = useState('')
+  const { isPhone } = useResponsiveBreakpoint()
 
   /** Toggle a mood: clicking the active mood deselects it. */
   const handleMoodClick = useCallback(
@@ -92,13 +94,14 @@ const MoodTagPicker = ({
         padding: '8px 16px',
         borderTop: `1px solid ${theme.text}15`,
         display: 'flex',
+        flexDirection: isPhone ? 'column' : 'row',
         flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: '12px',
+        alignItems: isPhone ? 'stretch' : 'center',
+        gap: isPhone ? '8px' : '12px',
       }}
     >
       {/* Mood emoji row */}
-      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: isPhone ? 'center' : 'flex-start' }}>
         {MOOD_OPTIONS.map(({ emoji, label }) => (
           <button
             key={label}
@@ -126,9 +129,13 @@ const MoodTagPicker = ({
         ))}
       </div>
 
-      {/* Divider */}
+      {/* Divider -- vertical on desktop, horizontal on phone */}
       <div
-        style={{
+        style={isPhone ? {
+          height: '1px',
+          width: '100%',
+          backgroundColor: `${theme.text}15`,
+        } : {
           width: '1px',
           height: '20px',
           backgroundColor: `${theme.text}20`,
@@ -195,7 +202,7 @@ const MoodTagPicker = ({
             color: theme.text,
             fontSize: '12px',
             padding: '2px 4px',
-            width: '80px',
+            width: isPhone ? '100%' : '80px',
             opacity: 0.6,
           }}
         />

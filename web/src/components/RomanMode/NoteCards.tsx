@@ -161,7 +161,7 @@ const CardItem = ({
               borderRadius: '3px',
               color: theme.text,
               fontSize: '10px',
-              padding: '2px 8px',
+              padding: '8px 12px',
               cursor: 'pointer',
               opacity: 0.6,
             }}
@@ -177,7 +177,7 @@ const CardItem = ({
               color: theme.background,
               fontSize: '10px',
               fontWeight: 600,
-              padding: '2px 8px',
+              padding: '8px 12px',
               cursor: 'pointer',
             }}
           >
@@ -229,8 +229,8 @@ const CardItem = ({
             color: theme.text,
             opacity: 0.3,
             cursor: 'pointer',
-            fontSize: '12px',
-            padding: '0 2px',
+            fontSize: '14px',
+            padding: '8px 10px',
             lineHeight: 1,
           }}
         >
@@ -356,9 +356,9 @@ const NoteCards = ({ documentId, theme }: NoteCardsProps) => {
                   border: `1px solid ${CARD_TYPE_COLORS[type]}40`,
                   borderRadius: '3px',
                   color: CARD_TYPE_COLORS[type],
-                  fontSize: '9px',
+                  fontSize: '10px',
                   fontWeight: 600,
-                  padding: '2px 6px',
+                  padding: '8px 12px',
                   cursor: 'pointer',
                 }}
               >

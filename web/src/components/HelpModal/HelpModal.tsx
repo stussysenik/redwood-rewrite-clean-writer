@@ -102,9 +102,9 @@ const HelpModal = ({ isOpen, onClose, theme }: HelpModalProps) => {
           position: 'relative',
           maxWidth: '520px',
           width: '100%',
-          maxHeight: '80vh',
+          maxHeight: '80dvh',
           overflowY: 'auto',
-          padding: '28px 32px',
+          padding: '24px 20px',
           borderRadius: '12px',
           backgroundColor: `${theme.background}F5`,
           backdropFilter: 'blur(16px)',
@@ -217,7 +217,9 @@ const HelpModal = ({ isOpen, onClose, theme }: HelpModalProps) => {
             letterSpacing: '0.08em',
           }}
         >
-          Hold Tab to show this panel -- Esc to close
+          {typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad/.test(navigator.userAgent)
+            ? 'Tap outside or use the close button to dismiss'
+            : 'Hold Tab to show this panel \u2014 Esc to close'}
         </div>
       </div>
     </div>

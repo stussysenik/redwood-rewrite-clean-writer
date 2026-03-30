@@ -213,7 +213,7 @@ const ActionButtons = ({
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'nowrap' }}>
         <button
           onClick={handleExport}
           style={buttonStyle}

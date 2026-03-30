@@ -3,7 +3,7 @@
  *
  * Layer stack (bottom to top):
  *   1. SyntaxBackdrop -- visible colored text + inline blinking cursor
- *   2. Hidden <textarea> -- captures keyboard input (opacity: 0, z-index: 10)
+ *   2. Hidden <textarea> -- captures keyboard input (transparent colors, z-index: 10)
  *
  * Both layers share IDENTICAL font metrics (fontFamily, fontSize, lineHeight,
  * letterSpacing, whiteSpace, wordBreak) so they align pixel-for-pixel.
@@ -23,6 +23,7 @@ import { useRef, useCallback, useState, useMemo } from 'react'
 
 import SyntaxBackdrop from 'src/components/Typewriter/SyntaxBackdrop'
 import { useIMEComposition } from 'src/hooks/useIMEComposition'
+import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import {
   isHashtagToken,
   isNumberToken,
@@ -178,6 +179,7 @@ const Typewriter = ({
 }: TypewriterProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
+  const { isPhone } = useResponsiveBreakpoint()
 
   // IME composition handling for CJK input
   const {
@@ -337,7 +339,9 @@ const Typewriter = ({
           letterSpacingProp !== 0 ? `${letterSpacingProp}px` : undefined,
         minHeight: '100%',
         cursor: 'text',
-        padding: '1rem 1rem 2rem',
+        padding: isPhone
+          ? '1rem 1rem 160px'
+          : '1rem 1rem 2rem',
       }}
     >
       {/* Max-width centered container with relative positioning for overlay */}
@@ -373,6 +377,7 @@ const Typewriter = ({
         {/* Layer 2: Hidden input capture (must match SyntaxBackdrop font metrics) */}
         <textarea
           ref={textareaRef}
+          data-typewriter-input
           value={content}
           onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
@@ -392,7 +397,10 @@ const Typewriter = ({
             left: 0,
             width: '100%',
             height: '100%',
-            opacity: 0,
+            color: 'transparent',
+            caretColor: 'transparent',
+            WebkitTextFillColor: 'transparent',
+            background: 'transparent',
             zIndex: 10,
             resize: 'none',
             border: 'none',

@@ -3,7 +3,7 @@
  *
  * This component is the "visible text" layer in the 3-layer overlay:
  *   1. SyntaxBackdrop (this) -- renders colored, bolded text + inline cursor
- *   2. Hidden <textarea> -- captures keyboard input (positioned on top, opacity: 0)
+ *   2. Hidden <textarea> -- captures keyboard input (positioned on top, transparent colors)
  *
  * The font metrics (fontFamily, fontSize, lineHeight, letterSpacing, whiteSpace,
  * wordBreak) MUST match the hidden textarea exactly so that the two layers

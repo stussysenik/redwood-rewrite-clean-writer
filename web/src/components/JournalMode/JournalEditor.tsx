@@ -21,6 +21,7 @@ import { useQuery, useMutation } from '@redwoodjs/web'
 
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useAutoSave } from 'src/hooks/useAutoSave'
+import { useMobileKeyboard } from 'src/hooks/useMobileKeyboard'
 import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
 import { countWords } from 'src/lib/wordCount'
@@ -142,6 +143,7 @@ const JournalEditor = ({
   const [tags, setTagsRaw] = useState<string[]>([])
   const [entryId, setEntryId] = useState<string | null>(null)
   const { isMobile } = useResponsiveBreakpoint()
+  const hideChrome = useMobileKeyboard()
   const [calendarOpen, setCalendarOpen] = useState(() => !isMobile)
 
   // Refs for the auto-save closure to always see current values
@@ -340,48 +342,52 @@ const JournalEditor = ({
         />
       </div>
 
-      {/* Mood + tag picker */}
-      <MoodTagPicker
-        mood={mood}
-        onMoodChange={handleMoodChange}
-        tags={tags}
-        onTagsChange={handleTagsChange}
-        theme={theme}
-      />
-
-      {/* Collapsible calendar */}
-      <div>
-        <button
-          onClick={() => setCalendarOpen(!calendarOpen)}
-          style={{
-            width: '100%',
-            background: 'none',
-            border: 'none',
-            borderTop: `1px solid ${theme.text}15`,
-            color: theme.text,
-            opacity: 0.5,
-            fontSize: '11px',
-            padding: '4px 16px',
-            cursor: 'pointer',
-            textAlign: 'left',
-            fontWeight: 500,
-          }}
-          aria-expanded={calendarOpen}
-          aria-label="Toggle calendar"
-        >
-          {calendarOpen ? '\u25BC' : '\u25B6'} Calendar
-        </button>
-
-        {calendarOpen && (
-          <JournalCalendar
-            selectedDate={selectedDate}
-            onDateChange={handleDateChange}
-            viewMonth={viewMonth}
-            onViewMonthChange={setViewMonth}
+      {/* Mood + tag picker + calendar — hidden when keyboard is visible on mobile */}
+      {!hideChrome && (
+        <>
+          <MoodTagPicker
+            mood={mood}
+            onMoodChange={handleMoodChange}
+            tags={tags}
+            onTagsChange={handleTagsChange}
             theme={theme}
           />
-        )}
-      </div>
+
+          {/* Collapsible calendar */}
+          <div>
+            <button
+              onClick={() => setCalendarOpen(!calendarOpen)}
+              style={{
+                width: '100%',
+                background: 'none',
+                border: 'none',
+                borderTop: `1px solid ${theme.text}15`,
+                color: theme.text,
+                opacity: 0.5,
+                fontSize: '11px',
+                padding: '4px 16px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontWeight: 500,
+              }}
+              aria-expanded={calendarOpen}
+              aria-label="Toggle calendar"
+            >
+              {calendarOpen ? '\u25BC' : '\u25B6'} Calendar
+            </button>
+
+            {calendarOpen && (
+              <JournalCalendar
+                selectedDate={selectedDate}
+                onDateChange={handleDateChange}
+                viewMonth={viewMonth}
+                onViewMonthChange={setViewMonth}
+                theme={theme}
+              />
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }
