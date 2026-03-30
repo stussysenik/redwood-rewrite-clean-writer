@@ -271,7 +271,7 @@ const ThemeSelector = () => {
   } = useTheme()
 
   const [customizerOpen, setCustomizerOpen] = useState(false)
-  const { isPhone } = useResponsiveBreakpoint()
+  const { isMobile } = useResponsiveBreakpoint()
 
   // Load custom themes from DB
   const { data, refetch } = useQuery(CUSTOM_THEMES_QUERY, {
@@ -384,7 +384,7 @@ const ThemeSelector = () => {
               display: 'flex',
               gap: '8px',
               alignItems: 'center',
-              ...(isPhone
+              ...(isMobile
                 ? {
                     flexWrap: 'nowrap',
                     overflowX: 'auto',

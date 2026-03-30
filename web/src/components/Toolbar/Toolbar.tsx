@@ -64,7 +64,7 @@ const Toolbar = ({
   onShowHelp,
 }: ToolbarProps) => {
   const { theme } = useTheme()
-  const { isDesktop, isPhone } = useResponsiveBreakpoint()
+  const { isDesktop } = useResponsiveBreakpoint()
   const { keyboardVisible } = useVisualViewport()
 
   // Hide toolbar when virtual keyboard is open on mobile (distraction-free typing)
@@ -109,7 +109,7 @@ const Toolbar = ({
             : 'max(10px, env(safe-area-inset-right, 0px))',
         }}
       >
-        {(isDesktop || !isPhone) ? (
+        {isDesktop ? (
           /* Desktop: single row */
           <div
             style={{

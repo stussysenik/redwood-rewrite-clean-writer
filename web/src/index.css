@@ -50,8 +50,12 @@ select {
 }
 
 input:not([type="hidden"]),
-textarea {
+textarea:not([data-typewriter-input]) {
   min-height: var(--touch-min);
+  touch-action: manipulation;
+}
+
+textarea[data-typewriter-input] {
   touch-action: manipulation;
 }
 

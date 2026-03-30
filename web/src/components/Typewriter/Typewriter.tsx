@@ -377,6 +377,7 @@ const Typewriter = ({
         {/* Layer 2: Hidden input capture (must match SyntaxBackdrop font metrics) */}
         <textarea
           ref={textareaRef}
+          data-typewriter-input
           value={content}
           onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
@@ -396,7 +397,10 @@ const Typewriter = ({
             left: 0,
             width: '100%',
             height: '100%',
-            opacity: 0,
+            color: 'transparent',
+            caretColor: 'transparent',
+            WebkitTextFillColor: 'transparent',
+            background: 'transparent',
             zIndex: 10,
             resize: 'none',
             border: 'none',
