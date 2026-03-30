@@ -24,6 +24,7 @@ import { useQuery, useMutation } from '@redwoodjs/web'
 import Typewriter from 'src/components/Typewriter/Typewriter'
 import { useAutoSave } from 'src/hooks/useAutoSave'
 import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
+import { useVisualViewport } from 'src/hooks/useVisualViewport'
 import { countWords } from 'src/lib/wordCount'
 import type { HighlightConfig, RisoTheme, SyntaxSets } from 'src/types/editor'
 
@@ -136,6 +137,7 @@ const ChaptersEditor = ({
   // -----------------------------------------------------------------------
 
   const { isMobile, isPhone, isTablet } = useResponsiveBreakpoint()
+  const { keyboardVisible } = useVisualViewport()
 
   /** ID of the currently active chapter being edited */
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null)
@@ -507,8 +509,8 @@ const ChaptersEditor = ({
 
       {/* Right: Typewriter Editor with Outline overlay */}
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        {/* Mobile: hamburger toggle button */}
-        {isMobile && (
+        {/* Mobile: hamburger toggle button — hidden when keyboard is visible */}
+        {isMobile && !keyboardVisible && (
           <button
             onClick={() => setMobileSidebarOpen(true)}
             title="Show chapters"

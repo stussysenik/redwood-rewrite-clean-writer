@@ -39,6 +39,7 @@ import { useTheme } from 'src/context/ThemeContext'
 import { useAutoSave } from 'src/hooks/useAutoSave'
 import { useResponsiveBreakpoint } from 'src/hooks/useResponsiveBreakpoint'
 import { useSyntaxWorker } from 'src/hooks/useSyntaxWorker'
+import { useVisualViewport } from 'src/hooks/useVisualViewport'
 import { countWords } from 'src/lib/wordCount'
 import type { HighlightConfig } from 'src/types/editor'
 
@@ -145,6 +146,7 @@ const RomanEditor = ({
 }: RomanEditorProps) => {
   const { theme } = useTheme()
   const { isMobile, isPhone, isTablet } = useResponsiveBreakpoint()
+  const { keyboardVisible } = useVisualViewport()
 
   /** Mobile overlay state for left nav */
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -440,8 +442,8 @@ const RomanEditor = ({
           overflow: 'hidden',
         }}
       >
-        {/* Manuscript mode toggle bar */}
-        <div
+        {/* Manuscript mode toggle bar — hidden when keyboard is visible on mobile */}
+        {!(keyboardVisible && isMobile) && <div
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -574,7 +576,7 @@ const RomanEditor = ({
               </button>
             )}
           </div>
-        </div>
+        </div>}
 
         {/* Editor area */}
         <div style={{ flex: 1, overflow: 'auto' }}>
