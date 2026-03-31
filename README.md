@@ -25,6 +25,9 @@ Clean Writer is a full-stack writing app built for flow. It highlights your word
 
 ## Features
 
+![Demo](demo.gif)
+
+
 - **[4 Writing Modes](#writing-modes)** — Typewriter, Journal, Chapters, and Roman (manuscript)
 - **[Real-time NLP Highlighting](#syntax-highlighting)** — 12 parts of speech colored via Web Workers
 - **[Song Mode](#song-mode)** — Rhyme scheme detection, syllable counting, flow metrics
